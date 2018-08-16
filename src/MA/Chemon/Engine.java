@@ -18,41 +18,35 @@ import MA.util.State;
 public class Engine {
 
 	Move lastMove, bestMove;
-	boolean inOpening, mateW, mateB, checkB, checkW;
-	int numberOfMoves = 0, depth;
+	boolean inOpening, blackIsMated, whiteIsMated, blackIsChecked, whiteIsChecked;
+	int numberOfMoves = 0, analyzationDepth;
 	Movetree startTree, testTree = new Movetree(0, 0, 0);
-	Position actualPosition;
-	Opening Opening;
-	Controller Controller;
-	int anzbewert;
+	Position currentPosition;
+	Opening opening;
+	Controller controller;
+	int analyzedPositions;
 
-	/**
-	 * Die Engine berechnet die Züge und Positionen.
-	 * 
-	 * @param :
-	 *            p die Anfangsposition
-	 */
 	public Engine(Position p) {
 		lastMove = new Move(10, 0, 0);
-		actualPosition = p.clone();
-		actualPosition.lastMove = lastMove;
+		currentPosition = p.clone();
+		currentPosition.lastMove = lastMove;
 		startTree = new Movetree(lastMove);
-		startTree.position = actualPosition;
+		startTree.position = currentPosition;
 	}
 
 	public void work() {
 
-		if (Controller.whitesTurn) {
+		if (controller.whitesTurn) {
 
 			calculateWhiteMove();
 			Movetree m = new Movetree(bestMove);
-			m.position = actualPosition;
-			actualPosition = executeMove(m);
-			if (controlCheckW(actualPosition))
-				checkW = true;
+			m.position = currentPosition;
+			currentPosition = executeMove(m);
+			if (controlCheckW(currentPosition))
+				whiteIsChecked = true;
 			else
-				checkW = false;
-			startTree.position = actualPosition;
+				whiteIsChecked = false;
+			startTree.position = currentPosition;
 			lastMove = bestMove;
 		} else {
 			if (inOpening)
@@ -62,57 +56,42 @@ public class Engine {
 			else if (numberOfMoves > 1)
 				calculateBlackMove();
 			Movetree m = new Movetree(bestMove);
-			m.position = actualPosition;
-			actualPosition = executeMove(m);
-			if (controlCheckB(actualPosition))
-				checkB = true;
+			m.position = currentPosition;
+			currentPosition = executeMove(m);
+			if (controlCheckB(currentPosition))
+				blackIsChecked = true;
 			else
-				checkB = false;
-			startTree.position = actualPosition;
+				blackIsChecked = false;
+			startTree.position = currentPosition;
 			lastMove = bestMove;
 			numberOfMoves++;
 		}
 	}
 
-	/*
-	 * public double alphabeta(Movetree m, int pDepth, double alpha, double beta) {
-	 * if(pDepth == 0) return evaluateMovetree(m); if(pDepth % 2== depth %2)
-	 * m.Children=movesW(m.Position, m); else m.Children=movesB(m.Position, m);
-	 * for(Movetree child: m.Children){ child.Position = executeMove(child);
-	 * if(pDepth % 2== depth %2){ alpha = Math.max(alpha,
-	 * alphabeta(child,pDepth-1,alpha,beta)); if(alpha >= beta) return alpha;} else
-	 * { beta = Math.min(beta, alphabeta(child,pDepth-1,alpha,beta)); if(alpha >=
-	 * beta) return beta; }} if(pDepth % 2== depth %2) return alpha; else return
-	 * beta; }
-	 */
-
-	/**
-	 * berechnet den besten schwarzen Zug
-	 */
 	private void calculateBlackMove() {
 		int d = 0;
-		startTree.children = legalMovesB(actualPosition, startTree);
+		startTree.children = legalMovesB(currentPosition, startTree);
 		if (startTree.children.isEmpty()) {
-			Controller.running = false;
-			if (controlCheckW(actualPosition)) {
-				mateW = true;
+			controller.running = false;
+			if (controlCheckW(currentPosition)) {
+				blackIsMated = true;
 				return;
 			} else {
-				Controller.handleDraw();//
+				controller.handleDraw();//
 				JOptionPane.showMessageDialog(null, "Stalemate!");
 			}
 		}
 		for (Movetree m : startTree.children) {
 			m.position = executeMove(m);
-			if (Controller.searchWith == SearchAlgorithm.MinMax)
+			if (controller.searchWith == SearchAlgorithm.MinMax)
 				d = min(m, 2);
-			else if (Controller.searchWith == SearchAlgorithm.AlphaBeta)
+			else if (controller.searchWith == SearchAlgorithm.AlphaBeta)
 				d = beta(m, 3, -2000, 2000);
-			else if (Controller.searchWith == SearchAlgorithm.PrincipalVariation) {
-				depth = 3;
+			else if (controller.searchWith == SearchAlgorithm.PrincipalVariation) {
+				analyzationDepth = 3;
 				d = PrincipalVariation(m, 2, -2000, 2000);
-			} else if (Controller.searchWith == SearchAlgorithm.Zugvorsortierung) {
-				depth = 3;
+			} else if (controller.searchWith == SearchAlgorithm.Zugvorsortierung) {
+				analyzationDepth = 3;
 				d = PrincipalVariationSorted(m, 2, -2000, 2000);
 			}
 			m.value = d;
@@ -135,13 +114,10 @@ public class Engine {
 			}
 		}
 
-		System.out.println(anzbewert);
-		anzbewert = 0;
+		System.out.println(analyzedPositions);
+		analyzedPositions = 0;
 	}
 
-	/**
-	 * berechnet den besten weissen Zug
-	 */
 	private void calculateWhiteMove() {
 		if (inOpening)
 			playOpening();
@@ -156,14 +132,14 @@ public class Engine {
 			else
 				bestMove = new Move(12, 27, 46);
 		} else {
-			startTree.children = legalMovesW(actualPosition, startTree);
+			startTree.children = legalMovesW(currentPosition, startTree);
 			if (startTree.children.isEmpty()) {
-				Controller.running = false;
-				if (controlCheckB(actualPosition)) {
-					mateB = true;
+				controller.running = false;
+				if (controlCheckB(currentPosition)) {
+					whiteIsMated = true;
 					return;
 				} else {
-					Controller.handleDraw();
+					controller.handleDraw();
 					JOptionPane.showMessageDialog(null, "Patt!");
 				}
 			}
@@ -186,12 +162,12 @@ public class Engine {
 					startTree.value = startTree.children.get(0).value;
 				}
 			else {
-				Controller.running = false;
-				Controller.handleDraw();
+				controller.running = false;
+				controller.handleDraw();
 			}
 		}
-		System.out.println(anzbewert);
-		anzbewert = 0;
+		System.out.println(analyzedPositions);
+		analyzedPositions = 0;
 	}
 
 	private int PrincipalVariation(Movetree m, int pDepth, int alpha, int beta) {
@@ -199,7 +175,7 @@ public class Engine {
 		int value = 0;
 		if (pDepth == 0)
 			return evaluateMovetree(m);
-		if (pDepth % 2 == depth % 2)
+		if (pDepth % 2 == analyzationDepth % 2)
 			m.children = legalMovesW(m.position, m);
 		else
 			m.children = legalMovesB(m.position, m);
@@ -212,7 +188,7 @@ public class Engine {
 						value = PrincipalVariation(child, pDepth - 1, -beta, -alpha);
 				} else
 					value = PrincipalVariation(child, pDepth - 1, -beta, -alpha);
-				if (pDepth % 2 == depth % 2) {
+				if (pDepth % 2 == analyzationDepth % 2) {
 					if (value <= beta) {
 						m.children.clear();
 						return beta;
@@ -235,9 +211,9 @@ public class Engine {
 			m.children.clear();
 			return alpha;
 		} else { // keine Züge möglich
-			if (pDepth % 2 == depth % 2 && controlCheckB(m.position))
+			if (pDepth % 2 == analyzationDepth % 2 && controlCheckB(m.position))
 				return 1000; // Weiss am Züge und weisser König im Schach(=Matt)
-			else if ((pDepth + 1) % 2 == depth % 2 && controlCheckW(m.position))
+			else if ((pDepth + 1) % 2 == analyzationDepth % 2 && controlCheckW(m.position))
 				return -1000;// Schwarz am Züge und schwarzer König im Schach(=Matt)
 			else // Patt
 				return 0;
@@ -249,7 +225,7 @@ public class Engine {
 		int value;
 		if (pDepth == 0)
 			return evaluateMovetree(m);
-		if (pDepth % 2 == depth % 2)
+		if (pDepth % 2 == analyzationDepth % 2)
 			m.children = sortedadmovesW(m.position, m);
 		else
 			m.children = sortedadmovesB(m.position, m);
@@ -262,7 +238,7 @@ public class Engine {
 						value = PrincipalVariation(child, pDepth - 1, -beta, -alpha);
 				} else
 					value = PrincipalVariation(child, pDepth - 1, -beta, -alpha);
-				if (pDepth % 2 == depth % 2) {
+				if (pDepth % 2 == analyzationDepth % 2) {
 					if (value <= beta) {
 						m.children.clear();
 						return beta;
@@ -285,9 +261,9 @@ public class Engine {
 			m.children.clear();
 			return alpha;
 		} else { // keine Züge möglich
-			if (pDepth % 2 == depth % 2 && controlCheckB(m.position))
+			if (pDepth % 2 == analyzationDepth % 2 && controlCheckB(m.position))
 				return 1000; // Weiss am Züge und weisser König im Schach(=Matt)
-			else if ((pDepth + 1) % 2 == depth % 2 && controlCheckW(m.position))
+			else if ((pDepth + 1) % 2 == analyzationDepth % 2 && controlCheckW(m.position))
 				return -1000;// Schwarz am Züge und schwarzer König im Schach(=Matt)
 			else // Patt
 				return 0;
@@ -377,24 +353,24 @@ public class Engine {
 	private void playOpening() {
 		Move Book;
 		boolean notFound = true;
-		if (Opening.helpTree.children != null)
-			for (Movetree m : Opening.helpTree.children) {
+		if (opening.helpTree.children != null)
+			for (Movetree m : opening.helpTree.children) {
 				Book = m.move;
 				if (Book.piece == lastMove.piece && Book.from == lastMove.from && Book.to == lastMove.to
 						&& m.children != null) {
 					notFound = false;
-					Opening.helpTree = m;
+					opening.helpTree = m;
 					int random = randomnumber(0, m.children.size() - 1);
 					bestMove = m.children.get(random).move;
 					lastMove = bestMove;
-					if (Controller.status != State.Machine_versus_Machine)
-						Opening.helpTree = m.children.get(random);
-					Controller.sleep(200);
+					if (controller.status != State.Machine_versus_Machine)
+						opening.helpTree = m.children.get(random);
+					controller.sleep(200);
 				}
 			}
 		if (notFound) {
 			inOpening = false;
-			if (!Controller.whitesTurn)
+			if (!controller.whitesTurn)
 				calculateBlackMove();
 			else
 				calculateWhiteMove();
@@ -408,21 +384,21 @@ public class Engine {
 			if (lastMove.piece == 10) {
 				if (lastMove.from == 33 && lastMove.to == 53) {
 					inOpening = true;
-					Opening = new English();
+					opening = new English();
 					playOpening();
 				} else if (lastMove.from == 35 && lastMove.to == 55) {
 					inOpening = true;
 					// if (Zufall < 0.5)
 					// Opening = new Sicilian();
 					// else
-					Opening = new Spanish();
+					opening = new Spanish();
 					playOpening();
 				} else if (lastMove.from == 34 && lastMove.to == 54) {
 					inOpening = true;
 					if (Zufall < 0.5)
-						Opening = new Slav();
+						opening = new Slav();
 					else
-						Opening = new Kings_Indian();
+						opening = new Kings_Indian();
 					playOpening();
 				} else
 					calculateBlackMove();
@@ -506,7 +482,7 @@ public class Engine {
 
 	public boolean isLegalWhite(Move m) {
 
-		ArrayList<Movetree> list = movesW(actualPosition, new Movetree(m));
+		ArrayList<Movetree> list = movesW(currentPosition, new Movetree(m));
 		boolean result = false;
 		Movetree movetree = null;
 		for (Movetree tree : list) {
@@ -518,7 +494,7 @@ public class Engine {
 		}
 
 		if (result) {
-			movetree.position = actualPosition.clone();
+			movetree.position = currentPosition.clone();
 			Position pos = executeMove(movetree);
 			int i = pos.whiteKing();
 			ArrayList<Movetree> list2 = movesB(pos, movetree);
@@ -534,7 +510,7 @@ public class Engine {
 	}
 
 	public boolean isLegalBlack(Move m) {
-		ArrayList<Movetree> l = movesB(actualPosition, new Movetree(m));
+		ArrayList<Movetree> l = movesB(currentPosition, new Movetree(m));
 		Move compare;
 		for (Movetree t : l) {
 			compare = t.move;
@@ -599,15 +575,15 @@ public class Engine {
 	public void handleWhiteMove(Move pMove) {
 		lastMove = pMove;
 		Movetree m = new Movetree(pMove);
-		m.position = actualPosition;
-		actualPosition = executeMove(m);
+		m.position = currentPosition;
+		currentPosition = executeMove(m);
 		numberOfMoves++;
 		startTree = new Movetree(pMove);
-		startTree.position = actualPosition;
-		if (controlCheckW(actualPosition))
-			checkW = true;
+		startTree.position = currentPosition;
+		if (controlCheckW(currentPosition))
+			whiteIsChecked = true;
 		else
-			checkW = false;
+			whiteIsChecked = false;
 	}
 
 	/*
@@ -637,19 +613,19 @@ public class Engine {
 			return 10000000;
 		int Insgesamt = evaluatePosition(movetree.position) + evaluateMaterial(movetree.position.Board);
 		Insgesamt += movesB(movetree.position, movetree).size();
-		anzbewert++;
+		analyzedPositions++;
 		return Insgesamt;
 	}
 
 	public int evaluatePosition(Position position) {
 		int Position = 0;
-		if (actualPosition.klros)
+		if (currentPosition.klros)
 			Position += 5;
-		if (actualPosition.grros)
+		if (currentPosition.grros)
 			Position += 4;
-		if (!actualPosition.klrow)
+		if (!currentPosition.klrow)
 			Position += 5;
-		if (!actualPosition.grrow)
+		if (!currentPosition.grrow)
 			Position += 4;
 		int posKW = 0, posKB = 0;
 		for (int i = 21; i < 99; i++) {
@@ -1403,16 +1379,6 @@ public class Engine {
 			list.add(new Movetree(4 + Board[to] - 3, z, 12, from, to));
 		return list;
 	}
-
-	/**
-	 * liefert eine ganze Zufallszahl
-	 * 
-	 * @param from
-	 *            : untere Grenze
-	 * @param to
-	 *            : obere Grenze
-	 * @return int x, from <= x <= to
-	 */
 
 	private int randomnumber(int from, int to) {
 		if (from == to)
