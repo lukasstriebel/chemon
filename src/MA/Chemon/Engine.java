@@ -26,9 +26,13 @@ public class Engine {
 	Controller controller;
 	int analyzedPositions;
 
-	public Engine(Position p) {
+	public Engine() {
 		lastMove = new Move(10, 0, 0);
-		currentPosition = p.clone();
+	}
+
+	public Engine(Position position) {
+		lastMove = new Move(10, 0, 0);
+		currentPosition = position.clone();
 		currentPosition.lastMove = lastMove;
 		startTree = new Movetree(lastMove);
 		startTree.position = currentPosition;
@@ -410,79 +414,79 @@ public class Engine {
 	public Position executeMove(Movetree Tree) {// liefert Position nach einem Zug
 
 		Move pMove = Tree.move;
-		int[] Board = Tree.position.Board.clone();
-		Position s = Tree.position.clone();
-		Board[pMove.to] = pMove.piece;
-		Board[pMove.from] = 0;
+		int[] board = Tree.position.board.clone();
+		Position position = Tree.position.clone();
+		board[pMove.to] = pMove.piece;
+		board[pMove.from] = 0;
 		if (pMove.piece == 15) {
-			s.klrow = false;
-			s.grrow = false;
+			position.klrow = false;
+			position.grrow = false;
 		} else if (pMove.piece == 11 && pMove.from == 21)
-			s.grrow = false;
+			position.grrow = false;
 		else if (pMove.piece == 11 && pMove.from == 28)
-			s.klrow = false;
+			position.klrow = false;
 
 		if (pMove.piece == 25) {
-			s.klros = false;
-			s.grros = false;
+			position.klros = false;
+			position.grros = false;
 		} else if (pMove.piece == 21 && pMove.from == 91)
-			s.grros = false;
+			position.grros = false;
 		else if (pMove.piece == 21 && pMove.from == 98)
-			s.klros = false;
+			position.klros = false;
 
 		if (pMove.addition > 0) {
 			if (pMove.addition == 1) {// en passant
-				Board[pMove.to - 10] = 0;
+				board[pMove.to - 10] = 0;
 			}
 			if (pMove.addition == 2) { // Umwandlung
-				Board[pMove.to] = 14;
+				board[pMove.to] = 14;
 			}
 			if (pMove.addition == 3) { // kl Rochade
-				Board[pMove.to - 1] = pMove.piece - 4;
-				Board[pMove.to + 1] = 0;
-				s.klrow = false;
-				s.grrow = false;
+				board[pMove.to - 1] = pMove.piece - 4;
+				board[pMove.to + 1] = 0;
+				position.klrow = false;
+				position.grrow = false;
 			}
 
 			if (pMove.addition == 4) { // gr Rochade
-				Board[pMove.to + 1] = pMove.piece - 4;
-				Board[pMove.to - 2] = 0;
-				s.klrow = false;
-				s.grrow = false;
+				board[pMove.to + 1] = pMove.piece - 4;
+				board[pMove.to - 2] = 0;
+				position.klrow = false;
+				position.grrow = false;
 			}
 		}
 
 		else {
 			if (pMove.addition == -1) {// en passant
-				Board[pMove.to + 10] = 0;
+				board[pMove.to + 10] = 0;
 			}
 
 			if (pMove.addition == -2) { // Umwandlung
-				Board[pMove.to] = 24;
+				board[pMove.to] = 24;
 			}
 		}
 
 		if (pMove.addition == -3) { // kl Rochade
-			Board[pMove.to - 1] = pMove.piece - 4;
-			Board[pMove.to + 1] = 0;
-			s.klros = false;
-			s.grros = false;
+			board[pMove.to - 1] = pMove.piece - 4;
+			board[pMove.to + 1] = 0;
+			position.klros = false;
+			position.grros = false;
 		}
 
 		if (pMove.addition == -4) { // gr Rochade
-			Board[pMove.to + 1] = pMove.piece - 4;
-			Board[pMove.to - 2] = 0;
-			s.klros = false;
-			s.grros = false;
+			board[pMove.to + 1] = pMove.piece - 4;
+			board[pMove.to - 2] = 0;
+			position.klros = false;
+			position.grros = false;
 		}
-		s.lastMove = pMove;
-		s.Board = Board;
-		return s;
+		position.lastMove = pMove;
+		position.board = board;
+		return position;
 	}
 
 	public boolean isLegalWhite(Move m) {
 
-		ArrayList<Movetree> list = movesW(currentPosition, new Movetree(m));
+		ArrayList<Movetree> list = movesWhite(currentPosition, new Movetree(m));
 		boolean result = false;
 		Movetree movetree = null;
 		for (Movetree tree : list) {
@@ -525,14 +529,14 @@ public class Engine {
 	}
 
 	public boolean controlCheckB(Position test) {
-		ArrayList<Movetree> list = movesW(test, testTree);
-		int posK = 0;
+		ArrayList<Movetree> list = movesWhite(test, testTree);
+		int blackKingPosition = 0;
 		test.d8threat = false;
 		test.f8threat = false;
 		test.lastMove = new Move(0, 0, 0);
 		for (int i = 21; i < 99; i++) {
-			if (test.Board[i] == 25) {
-				posK = i;
+			if (test.board[i] == 25) {
+				blackKingPosition = i;
 				break;
 			}
 		}
@@ -542,7 +546,7 @@ public class Engine {
 				test.d8threat = true;
 			if (compare == 96)
 				test.f8threat = true;
-			if (compare == posK)
+			if (compare == blackKingPosition)
 				return true;
 		}
 		return false;
@@ -550,13 +554,13 @@ public class Engine {
 
 	public boolean controlCheckW(Position test) {
 		ArrayList<Movetree> list = movesB(test, testTree);
-		int posK = 0;
+		int whiteKingPosition = 0;
 		test.d1threat = false;
 		test.f1threat = false;
 		test.lastMove = new Move(0, 0, 0);
 		for (int i = 21; i < 99; i++) {
-			if (test.Board[i] == 15) {
-				posK = i;
+			if (test.board[i] == 15) {
+				whiteKingPosition = i;
 				break;
 			}
 		}
@@ -566,7 +570,7 @@ public class Engine {
 				test.d1threat = true;
 			if (compare == 26)
 				test.f1threat = true;
-			if (compare == posK)
+			if (compare == whiteKingPosition)
 				return true;
 		}
 		return false;
@@ -595,9 +599,9 @@ public class Engine {
 	 * 0, -1, -1, 0, 0, 0, 0, 20, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1,
 	 * 20, 20, 20, 20, 0, 20, 20, 20, -1, -1, 21, 22, 23, 24, 25, 23, 22, 21, -1,
 	 * -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	 * -1, }; Move z = new Move(10, 54, 65); Movegenerator g = new Movegenerator(i);
-	 * g.lastMove = z; Position s = new Position(i); s.lastMove = z; z.st = s;
-	 * Position s2 = g.executeMove(z); }
+	 * -1, }; Move parent = new Move(10, 54, 65); Movegenerator g = new
+	 * Movegenerator(i); g.lastMove = parent; Position position = new Position(i);
+	 * position.lastMove = parent; parent.st = position; Position s2 = g.executeMove(parent); }
 	 */
 
 	/**
@@ -611,7 +615,7 @@ public class Engine {
 	public int evaluateMovetree(Movetree movetree) {
 		if (legalMovesW(movetree.position, movetree).size() == 0)
 			return 10000000;
-		int Insgesamt = evaluatePosition(movetree.position) + evaluateMaterial(movetree.position.Board);
+		int Insgesamt = evaluatePosition(movetree.position) + evaluateMaterial(movetree.position.board);
 		Insgesamt += movesB(movetree.position, movetree).size();
 		analyzedPositions++;
 		return Insgesamt;
@@ -629,9 +633,9 @@ public class Engine {
 			Position += 4;
 		int posKW = 0, posKB = 0;
 		for (int i = 21; i < 99; i++) {
-			if (position.Board[i] == 25)
+			if (position.board[i] == 25)
 				posKB = i;
-			else if (position.Board[i] == 15)
+			else if (position.board[i] == 15)
 				posKW = i;
 		}
 		if (posKB % 10 == 3 || posKB % 10 == 6)
@@ -700,46 +704,46 @@ public class Engine {
 	 * @return ArrayList<Movetree>, enthält alle möglichen schwarzen Züge
 	 */
 	public ArrayList<Movetree> movesB(Position position, Movetree movetreee) {
-		int[] Board = position.Board;
+		int[] board = position.board;
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		for (int i = 21; i < 99; i++) {
-			int f = Board[i];
+			int f = board[i];
 			switch (f) {
 			case 20:
-				list.addAll(pawnmovesB(Board, i, movetreee));
+				list.addAll(pawnmovesB(board, i, movetreee));
 				break;
 			case 21:
-				list.addAll(linemovesB(Board, i, 21, 10, movetreee));
-				list.addAll(linemovesB(Board, i, 21, -10, movetreee));
-				list.addAll(linemovesB(Board, i, 21, 1, movetreee));
-				list.addAll(linemovesB(Board, i, 21, -1, movetreee));
+				list.addAll(linemovesB(board, i, 21, 10, movetreee));
+				list.addAll(linemovesB(board, i, 21, -10, movetreee));
+				list.addAll(linemovesB(board, i, 21, 1, movetreee));
+				list.addAll(linemovesB(board, i, 21, -1, movetreee));
 				break;
 			case 22:
-				list.addAll(knightmovesB(Board, i, movetreee));
+				list.addAll(knightmovesB(board, i, movetreee));
 				break;
 			case 23:
-				list.addAll(linemovesB(Board, i, 23, 9, movetreee));
-				list.addAll(linemovesB(Board, i, 23, -9, movetreee));
-				list.addAll(linemovesB(Board, i, 23, 11, movetreee));
-				list.addAll(linemovesB(Board, i, 23, -11, movetreee));
+				list.addAll(linemovesB(board, i, 23, 9, movetreee));
+				list.addAll(linemovesB(board, i, 23, -9, movetreee));
+				list.addAll(linemovesB(board, i, 23, 11, movetreee));
+				list.addAll(linemovesB(board, i, 23, -11, movetreee));
 				break;
 			case 24:
-				list.addAll(linemovesB(Board, i, 24, 10, movetreee));
-				list.addAll(linemovesB(Board, i, 24, -10, movetreee));
-				list.addAll(linemovesB(Board, i, 24, 1, movetreee));
-				list.addAll(linemovesB(Board, i, 24, -1, movetreee));
-				list.addAll(linemovesB(Board, i, 24, 9, movetreee));
-				list.addAll(linemovesB(Board, i, 24, -9, movetreee));
-				list.addAll(linemovesB(Board, i, 24, 11, movetreee));
-				list.addAll(linemovesB(Board, i, 24, -11, movetreee));
+				list.addAll(linemovesB(board, i, 24, 10, movetreee));
+				list.addAll(linemovesB(board, i, 24, -10, movetreee));
+				list.addAll(linemovesB(board, i, 24, 1, movetreee));
+				list.addAll(linemovesB(board, i, 24, -1, movetreee));
+				list.addAll(linemovesB(board, i, 24, 9, movetreee));
+				list.addAll(linemovesB(board, i, 24, -9, movetreee));
+				list.addAll(linemovesB(board, i, 24, 11, movetreee));
+				list.addAll(linemovesB(board, i, 24, -11, movetreee));
 				break;
 			case 25:
 				list.addAll(kingmovesB(position, i, movetreee));
 				break;
 			}
 		} /*
-			 * for(Movetree m:list) { m.Move.Position = z.Position; Position afterwards =
-			 * executeMove(m.Move); m.Position=afterwards; if(controlCheckW(afterwards))
+			 * for(Movetree m:list) { m.Move.Position = parent.Position; Position afterwards
+			 * = executeMove(m.Move); m.Position=afterwards; if(controlCheckW(afterwards))
 			 * list.remove(m); } list.trimToSize(); if(list.isEmpty()) list.add(new
 			 * Movetree(new Move(20,0,0)));
 			 */
@@ -747,60 +751,60 @@ public class Engine {
 	}
 
 	private ArrayList<Movetree> kingmovesB(Position position, int from, Movetree movetree) {
-		int[] Board = position.Board;
+		int[] board = position.board;
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		int to = from + 1;
-		if (-1 < Board[to] && Board[to] < 18)
+		if (-1 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 25, from, to));
 		to = from - 1;
-		if (-1 < Board[to] && Board[to] < 18)
+		if (-1 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 25, from, to));
 		to = from + 10;
-		if (-1 < Board[to] && Board[to] < 18)
+		if (-1 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 25, from, to));
 		to = from - 10;
-		if (-1 < Board[to] && Board[to] < 18)
+		if (-1 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 25, from, to));
 		to = from + 11;
-		if (-1 < Board[to] && Board[to] < 18)
+		if (-1 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 25, from, to));
 		to = from - 11;
-		if (-1 < Board[to] && Board[to] < 18)
+		if (-1 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 25, from, to));
 		to = from + 9;
-		if (-1 < Board[to] && Board[to] < 18)
+		if (-1 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 25, from, to));
 		to = from - 9;
-		if (-1 < Board[to] && Board[to] < 18)
+		if (-1 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 25, from, to));
-		if (from == 95 && position.klros && Board[96] == 0 && Board[97] == 0 && Board[98] == 21 && !position.checkW
+		if (from == 95 && position.klros && board[96] == 0 && board[97] == 0 && board[98] == 21 && !position.checkW
 				&& !position.f8threat)
 			list.add(new Movetree(movetree, 25, from, 97, -3));
-		if (from == 95 && position.grros && Board[94] == 0 && Board[93] == 0 && Board[92] == 0 && Board[91] == 21
+		if (from == 95 && position.grros && board[94] == 0 && board[93] == 0 && board[92] == 0 && board[91] == 21
 				&& !position.checkW && !position.d8threat)
 			list.add(new Movetree(movetree, 25, from, 93, -4));
 		return list;
 	}
 
-	private ArrayList<Movetree> pawnmovesB(int[] Board, int from, Movetree movetree) {
+	private ArrayList<Movetree> pawnmovesB(int[] board, int from, Movetree movetree) {
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		int to = from - 10;
-		if (Board[to] == 0)
+		if (board[to] == 0)
 			list.add(new Movetree(movetree, 20, from, to));
-		else if (Board[to] == 0 && to < 30)
+		else if (board[to] == 0 && to < 30)
 			list.add(new Movetree(movetree, 25, from, to, -2));
 		to = from - 9;
-		if (2 < Board[to] && Board[to] < 18)
+		if (2 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 20, from, to));
-		else if (2 < Board[to] && Board[to] < 18 && to < 30)
+		else if (2 < board[to] && board[to] < 18 && to < 30)
 			list.add(new Movetree(movetree, 25, from, to, -2));
 		to = from - 11;
-		if (2 < Board[to] && Board[to] < 18)
+		if (2 < board[to] && board[to] < 18)
 			list.add(new Movetree(movetree, 20, from, to));
-		else if (2 < Board[to] && Board[to] < 18 && to < 30)
+		else if (2 < board[to] && board[to] < 18 && to < 30)
 			list.add(new Movetree(movetree, 25, from, to, -2));
 		to = from - 20;
-		if (from > 80 && Board[to] == 0 && Board[to + 10] == 0)
+		if (from > 80 && board[to] == 0 && board[to + 10] == 0)
 			list.add(new Movetree(movetree, 20, from, to));
 		if (lastMove.piece == 10 && lastMove.from == from - 21 && lastMove.to == from - 1)
 			list.add(new Movetree(movetree, 20, from, from - 11, -1));
@@ -809,50 +813,50 @@ public class Engine {
 		return list;
 	}
 
-	private ArrayList<Movetree> knightmovesB(int[] Board, int from, Movetree z) {
+	private ArrayList<Movetree> knightmovesB(int[] board, int from, Movetree parent) {
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		int to = from - 21;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, 22, from, to));
+		if (-1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, 22, from, to));
 		to = from - 19;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, 22, from, to));
+		if (-1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, 22, from, to));
 		to = from - 12;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, 22, from, to));
+		if (-1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, 22, from, to));
 		to = from - 8;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, 22, from, to));
+		if (-1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, 22, from, to));
 		to = from + 8;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, 22, from, to));
+		if (-1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, 22, from, to));
 		to = from + 12;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, 22, from, to));
+		if (-1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, 22, from, to));
 		to = from + 19;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, 22, from, to));
+		if (-1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, 22, from, to));
 		to = from + 21;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, 22, from, to));
+		if (-1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, 22, from, to));
 		return list;
 	}
 
-	private ArrayList<Movetree> linemovesB(int[] Board, int from, int figur, int constant, Movetree z) {
+	private ArrayList<Movetree> linemovesB(int[] board, int from, int figur, int constant, Movetree parent) {
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		int to = from + constant;
-		while (Board[to] == 0) {
-			list.add(new Movetree(z, figur, from, to));
+		while (board[to] == 0) {
+			list.add(new Movetree(parent, figur, from, to));
 			to += constant;
 		}
-		if (1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(z, figur, from, to));
+		if (1 < board[to] && board[to] < 18)
+			list.add(new Movetree(parent, figur, from, to));
 		return list;
 	}
 
-	public ArrayList<Movetree> legalMovesB(Position s, Movetree z) {
-		s.checkB = controlCheckB(s);
-		ArrayList<Movetree> raw = movesB(s, z);
+	public ArrayList<Movetree> legalMovesB(Position position, Movetree parent) {
+		position.checkB = controlCheckB(position);
+		ArrayList<Movetree> raw = movesB(position, parent);
 		for (int i = 0; i < raw.size(); i++) {
 			Movetree m = raw.get(i);
 			Position after = executeMove(m);
@@ -864,9 +868,9 @@ public class Engine {
 		return raw;
 	}
 
-	public ArrayList<Movetree> legalMovesW(Position s, Movetree z) {
-		s.checkW = controlCheckW(s);
-		ArrayList<Movetree> raw = movesW(s, z);
+	public ArrayList<Movetree> legalMovesW(Position position, Movetree parent) {
+		position.checkW = controlCheckW(position);
+		ArrayList<Movetree> raw = movesWhite(position, parent);
 		for (int i = 0; i < raw.size(); i++) {
 			Movetree m = raw.get(i);
 			Position after = executeMove(m);
@@ -878,9 +882,9 @@ public class Engine {
 		return raw;
 	}
 
-	public ArrayList<Movetree> sortedadmovesB(Position s, Movetree z) {
-		s.checkB = controlCheckB(s);
-		ArrayList<Movetree> raw = sortedmovesB(s, z);
+	public ArrayList<Movetree> sortedadmovesB(Position position, Movetree parent) {
+		position.checkB = controlCheckB(position);
+		ArrayList<Movetree> raw = movesB(position, parent);
 		for (int i = 0; i < raw.size(); i++) {
 			Movetree m = raw.get(i);
 			Position after = executeMove(m);
@@ -892,9 +896,9 @@ public class Engine {
 		return raw;
 	}
 
-	public ArrayList<Movetree> sortedadmovesW(Position s, Movetree z) {
-		s.checkW = controlCheckW(s);
-		ArrayList<Movetree> raw = sortedmovesW(s, z);
+	public ArrayList<Movetree> sortedadmovesW(Position position, Movetree parent) {
+		position.checkW = controlCheckW(position);
+		ArrayList<Movetree> raw = movesWhite(position, parent);
 		for (int i = 0; i < raw.size(); i++) {
 			Movetree m = raw.get(i);
 			Position after = executeMove(m);
@@ -906,479 +910,152 @@ public class Engine {
 		return raw;
 	}
 
-	/**
-	 * 
-	 * @param s
-	 *            Die Position, deren mögliche Züge berechnet werden soll
-	 * @param z
-	 *            Movtree, der als Vater dieser Züge angegeben wird
-	 * @return ArrayList<Movetree>, enthält alle möglichen weissen Züge
-	 */
-
-	public ArrayList<Movetree> movesW(Position s, Movetree z) {
-		int[] Board = s.Board;
+	public ArrayList<Movetree> movesWhite(Position position, Movetree movetree) {
+		int[] board = position.board;
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		for (int i = 21; i < 99; i++) {
-			int f = Board[i];
-			switch (f) {
+			int piece = board[i];
+			switch (piece) {
 			case 10:
-				list.addAll(pawnmovesW(Board, i, z));
+				list.addAll(pawnmovesW(board, i, movetree));
 				break;
 			case 11:
-				list.addAll(linemovesW(Board, i, 11, 10, z));
-				list.addAll(linemovesW(Board, i, 11, -10, z));
-				list.addAll(linemovesW(Board, i, 11, 1, z));
-				list.addAll(linemovesW(Board, i, 11, -1, z));
+				list.addAll(linemovesW(board, i, 11, 10, movetree));
+				list.addAll(linemovesW(board, i, 11, -10, movetree));
+				list.addAll(linemovesW(board, i, 11, 1, movetree));
+				list.addAll(linemovesW(board, i, 11, -1, movetree));
 				break;
 			case 12:
-				list.addAll(knightmovesW(Board, i, z));
+				list.addAll(knightmovesW(board, i, movetree));
 				break;
 			case 13:
-				list.addAll(linemovesW(Board, i, 13, 9, z));
-				list.addAll(linemovesW(Board, i, 13, -9, z));
-				list.addAll(linemovesW(Board, i, 13, 11, z));
-				list.addAll(linemovesW(Board, i, 13, -11, z));
+				list.addAll(linemovesW(board, i, 13, 9, movetree));
+				list.addAll(linemovesW(board, i, 13, -9, movetree));
+				list.addAll(linemovesW(board, i, 13, 11, movetree));
+				list.addAll(linemovesW(board, i, 13, -11, movetree));
 				break;
 			case 14:
-				list.addAll(linemovesW(Board, i, 14, 10, z));
-				list.addAll(linemovesW(Board, i, 14, -10, z));
-				list.addAll(linemovesW(Board, i, 14, 1, z));
-				list.addAll(linemovesW(Board, i, 14, -1, z));
-				list.addAll(linemovesW(Board, i, 14, 9, z));
-				list.addAll(linemovesW(Board, i, 14, -9, z));
-				list.addAll(linemovesW(Board, i, 14, 11, z));
-				list.addAll(linemovesW(Board, i, 14, -11, z));
+				list.addAll(linemovesW(board, i, 14, 10, movetree));
+				list.addAll(linemovesW(board, i, 14, -10, movetree));
+				list.addAll(linemovesW(board, i, 14, 1, movetree));
+				list.addAll(linemovesW(board, i, 14, -1, movetree));
+				list.addAll(linemovesW(board, i, 14, 9, movetree));
+				list.addAll(linemovesW(board, i, 14, -9, movetree));
+				list.addAll(linemovesW(board, i, 14, 11, movetree));
+				list.addAll(linemovesW(board, i, 14, -11, movetree));
 				break;
 			case 15:
-				list.addAll(kingmovesW(s, i, z));
+				list.addAll(kingmovesW(position, i, movetree));
 				break;
 			}
-		} /*
-			 * for(Movetree m:list) { m.Move.Position = z.Position; Position afterwards =
-			 * executeMove(m.Move); m.Position=afterwards; if(controlCheckB(afterwards))
-			 * list.remove(m); } list.trimToSize(); if(list.isEmpty()) list.add(new
-			 * Movetree(z,10,0,0)));
-			 */
+		}
 		return list;
 	}
 
-	private ArrayList<Movetree> kingmovesW(Position Pos, int from, Movetree z) {
-		int[] Board = Pos.Board;
+	private ArrayList<Movetree> kingmovesW(Position Pos, int from, Movetree parent) {
+		int[] board = Pos.board;
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		int to = from + 1;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(z, 15, from, to));
+		if (0 == board[to] || board[to] > 18)
+			list.add(new Movetree(parent, 15, from, to));
 		to = from - 1;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(z, 15, from, to));
+		if (0 == board[to] || board[to] > 18)
+			list.add(new Movetree(parent, 15, from, to));
 		to = from + 10;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(z, 15, from, to));
+		if (0 == board[to] || board[to] > 18)
+			list.add(new Movetree(parent, 15, from, to));
 		to = from - 10;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(z, 15, from, to));
+		if (0 == board[to] || board[to] > 18)
+			list.add(new Movetree(parent, 15, from, to));
 		to = from + 11;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(z, 15, from, to));
+		if (0 == board[to] || board[to] > 18)
+			list.add(new Movetree(parent, 15, from, to));
 		to = from - 11;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(z, 15, from, to));
+		if (0 == board[to] || board[to] > 18)
+			list.add(new Movetree(parent, 15, from, to));
 		to = from + 9;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(z, 15, from, to));
+		if (0 == board[to] || board[to] > 18)
+			list.add(new Movetree(parent, 15, from, to));
 		to = from - 9;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(z, 15, from, to));
-		if (from == 25 && Pos.klrow && Board[26] == 0 && Board[27] == 0 && Board[28] == 11 && !Pos.checkB
+		if (0 == board[to] || board[to] > 18)
+			list.add(new Movetree(parent, 15, from, to));
+		if (from == 25 && Pos.klrow && board[26] == 0 && board[27] == 0 && board[28] == 11 && !Pos.checkB
 				&& !Pos.f1threat)
-			list.add(new Movetree(z, 15, from, 27, 3));
-		if (from == 25 && Pos.grrow && Board[24] == 0 && Board[23] == 0 && Board[22] == 0 && Board[21] == 11
+			list.add(new Movetree(parent, 15, from, 27, 3));
+		if (from == 25 && Pos.grrow && board[24] == 0 && board[23] == 0 && board[22] == 0 && board[21] == 11
 				&& !Pos.checkB && !Pos.d1threat)
-			list.add(new Movetree(z, 15, from, 23, 4));
+			list.add(new Movetree(parent, 15, from, 23, 4));
 		return list;
 	}
 
-	private ArrayList<Movetree> linemovesW(int[] Board, int from, int figur, int constant, Movetree z) {
+	private ArrayList<Movetree> linemovesW(int[] board, int from, int figur, int constant, Movetree parent) {
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		int to = from + constant;
-		while (Board[to] == 0) {
-			list.add(new Movetree(z, figur, from, to));
+		while (board[to] == 0) {
+			list.add(new Movetree(parent, figur, from, to));
 			to += constant;
 		}
-		if (Board[to] > 18)
-			list.add(new Movetree(z, figur, from, to));
+		if (board[to] > 18)
+			list.add(new Movetree(parent, figur, from, to));
 		return list;
 	}
 
-	private ArrayList<Movetree> knightmovesW(int[] Board, int from, Movetree z) {
+	private ArrayList<Movetree> knightmovesW(int[] board, int from, Movetree parent) {
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		int to = from - 21;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(z, 12, from, to));
+		if (board[to] == 0 || board[to] > 18)
+			list.add(new Movetree(parent, 12, from, to));
 		to = from - 19;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(z, 12, from, to));
+		if (board[to] == 0 || board[to] > 18)
+			list.add(new Movetree(parent, 12, from, to));
 		to = from - 12;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(z, 12, from, to));
+		if (board[to] == 0 || board[to] > 18)
+			list.add(new Movetree(parent, 12, from, to));
 		to = from - 8;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(z, 12, from, to));
+		if (board[to] == 0 || board[to] > 18)
+			list.add(new Movetree(parent, 12, from, to));
 		to = from + 8;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(z, 12, from, to));
+		if (board[to] == 0 || board[to] > 18)
+			list.add(new Movetree(parent, 12, from, to));
 		to = from + 12;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(z, 12, from, to));
+		if (board[to] == 0 || board[to] > 18)
+			list.add(new Movetree(parent, 12, from, to));
 		to = from + 19;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(z, 12, from, to));
+		if (board[to] == 0 || board[to] > 18)
+			list.add(new Movetree(parent, 12, from, to));
 		to = from + 21;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(z, 12, from, to));
+		if (board[to] == 0 || board[to] > 18)
+			list.add(new Movetree(parent, 12, from, to));
 		return list;
 	}
 
-	private ArrayList<Movetree> pawnmovesW(int[] Board, int from, Movetree z) {
+	private ArrayList<Movetree> pawnmovesW(int[] board, int from, Movetree parent) {
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		int to = from + 10;
-		if (Board[to] == 0 && to < 90)
-			list.add(new Movetree(z, 10, from, to));
-		else if (Board[to] == 0 && to > 90)
-			list.add(new Movetree(z, 10, from, to, 2));
+		if (board[to] == 0 && to < 90)
+			list.add(new Movetree(parent, 10, from, to));
+		else if (board[to] == 0 && to > 90)
+			list.add(new Movetree(parent, 10, from, to, 2));
 		to = from + 9;
-		if (Board[to] > 18 && to < 90)
-			list.add(new Movetree(z, 10, from, to));
-		else if (Board[to] > 18 && to > 90)
-			list.add(new Movetree(z, 10, from, to, 2));
+		if (board[to] > 18 && to < 90)
+			list.add(new Movetree(parent, 10, from, to));
+		else if (board[to] > 18 && to > 90)
+			list.add(new Movetree(parent, 10, from, to, 2));
 		to = from + 11;
-		if (Board[to] > 18 && to < 90)
-			list.add(new Movetree(z, 10, from, to));
-		else if (Board[to] > 18 && to > 90)
-			list.add(new Movetree(z, 10, from, to, 2));
+		if (board[to] > 18 && to < 90)
+			list.add(new Movetree(parent, 10, from, to));
+		else if (board[to] > 18 && to > 90)
+			list.add(new Movetree(parent, 10, from, to, 2));
 		to = from + 20;
-		if (from < 40 && Board[to] == 0 && Board[to - 10] == 0)
-			list.add(new Movetree(z, 10, from, to));
+		if (from < 40 && board[to] == 0 && board[to - 10] == 0)
+			list.add(new Movetree(parent, 10, from, to));
 		if (lastMove.piece == 20 && lastMove.from == from + 21 && lastMove.to == from + 1)
-			list.add(new Movetree(z, 10, from, from + 11, 1));
+			list.add(new Movetree(parent, 10, from, from + 11, 1));
 		if (lastMove.piece == 20 && lastMove.from == from + 19 && lastMove.to == from - 1)
-			list.add(new Movetree(z, 10, from, from + 9, 1));
+			list.add(new Movetree(parent, 10, from, from + 9, 1));
 		return list;
 	}
 
-	// Mit Zugvorsortierung
-	/**
-	 * 
-	 * @param s
-	 *            Die Position, deren mögliche Züge berechnet werden soll
-	 * @param z
-	 *            Movtree, der als Vater dieser Züge angegeben wird
-	 * @return ArrayList<Movetree>, enthält alle möglichen schwarzen Züge
-	 */
-	public ArrayList<Movetree> sortedmovesB(Position s, Movetree z) {
-		int[] Board = s.Board;
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		for (int i = 21; i < 99; i++) {
-			int f = Board[i];
-			switch (f) {
-			case 20:
-				list.addAll(sortedPawnMovesB(Board, i, z));
-				break;
-			case 21:
-				list.addAll(sortedLineMovesB(Board, i, 21, 10, z));
-				list.addAll(sortedLineMovesB(Board, i, 21, -10, z));
-				list.addAll(sortedLineMovesB(Board, i, 21, 1, z));
-				list.addAll(sortedLineMovesB(Board, i, 21, -1, z));
-				break;
-			case 22:
-				list.addAll(sortedKnightMovesB(Board, i, z));
-				break;
-			case 23:
-				list.addAll(sortedLineMovesB(Board, i, 23, 9, z));
-				list.addAll(sortedLineMovesB(Board, i, 23, -9, z));
-				list.addAll(sortedLineMovesB(Board, i, 23, 11, z));
-				list.addAll(sortedLineMovesB(Board, i, 23, -11, z));
-				break;
-			case 24:
-				list.addAll(sortedLineMovesB(Board, i, 24, 10, z));
-				list.addAll(sortedLineMovesB(Board, i, 24, -10, z));
-				list.addAll(sortedLineMovesB(Board, i, 24, 1, z));
-				list.addAll(sortedLineMovesB(Board, i, 24, -1, z));
-				list.addAll(sortedLineMovesB(Board, i, 24, 9, z));
-				list.addAll(sortedLineMovesB(Board, i, 24, -9, z));
-				list.addAll(sortedLineMovesB(Board, i, 24, 11, z));
-				list.addAll(sortedLineMovesB(Board, i, 24, -11, z));
-				break;
-			case 25:
-				list.addAll(sortedKingMovesB(s, i, z));
-				break;
-			}
-		}
-		Collections.sort(list);
-		Collections.reverse(list);
-		return list;
-	}
-
-	private ArrayList<Movetree> sortedKingMovesB(Position Pos, int from, Movetree z) {
-		int[] Board = Pos.Board;
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		int to = from + 1;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - 10, z, 25, from, to));
-		to = from - 1;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - 10, z, 25, from, to));
-		to = from + 10;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - 10, z, 25, from, to));
-		to = from - 10;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - 10, z, 25, from, to));
-		to = from + 11;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - 10, z, 25, from, to));
-		to = from - 11;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - 10, z, 25, from, to));
-		to = from + 9;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - 10, z, 25, from, to));
-		to = from - 9;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - 10, z, 25, from, to));
-		if (from == 95 && Pos.klros && Board[96] == 0 && Board[97] == 0 && Board[98] == 21 && !Pos.checkW
-				&& !Pos.f8threat)
-			list.add(new Movetree(35, z, 25, from, 97, -3));
-		if (from == 95 && Pos.grros && Board[94] == 0 && Board[93] == 0 && Board[92] == 0 && Board[91] == 21
-				&& !Pos.checkW && !Pos.d8threat)
-			list.add(new Movetree(30, z, 25, from, 93, -4));
-		return list;
-	}
-
-	private ArrayList<Movetree> sortedPawnMovesB(int[] Board, int from, Movetree z) {
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		int to = from - 10;
-		if (Board[to] == 0)
-			list.add(new Movetree(1, z, 20, from, to));
-		else if (Board[to] == 0 && to < 30)
-			list.add(new Movetree(40, z, 25, from, to, -2));
-		to = from - 9;
-		if (2 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to], z, 20, from, to));
-		else if (2 < Board[to] && Board[to] < 18 && to < 30)
-			list.add(new Movetree(Board[to] + 40, z, 25, from, to, -2));
-		to = from - 11;
-		if (2 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to], z, 20, from, to));
-		else if (2 < Board[to] && Board[to] < 18 && to < 30)
-			list.add(new Movetree(Board[to] + 40, z, 25, from, to, -2));
-		to = from - 20;
-		if (from > 80 && Board[to] == 0 && Board[to + 10] == 0)
-			list.add(new Movetree(2, z, 20, from, to));
-		if (lastMove.piece == 10 && lastMove.from == from - 21 && lastMove.to == from - 1)
-			list.add(new Movetree(11, z, 20, from, from - 11, -1));
-		else if (lastMove.piece == 10 && lastMove.from == from - 19 && lastMove.to == from + 1)
-			list.add(new Movetree(11, z, 20, from, from - 9, -1));
-		return list;
-	}
-
-	private ArrayList<Movetree> sortedKnightMovesB(int[] Board, int from, Movetree z) {
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		int to = from - 21;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 22, from, to));
-		to = from - 19;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 22, from, to));
-		to = from - 12;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 22, from, to));
-		to = from - 8;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 22, from, to));
-		to = from + 8;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 22, from, to));
-		to = from + 12;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 22, from, to));
-		to = from + 19;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 22, from, to));
-		to = from + 21;
-		if (-1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 22, from, to));
-		return list;
-	}
-
-	private ArrayList<Movetree> sortedPawnMovesW(int[] Board, int from, Movetree z) {
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		int to = from + 10;
-		if (Board[to] == 0 && to < 90)
-			list.add(new Movetree(1, z, 10, from, to));
-		else if (Board[to] == 0 && to > 90)
-			list.add(new Movetree(40, z, 10, from, to, 2));
-		to = from + 9;
-		if (Board[to] > 18 && to < 90)
-			list.add(new Movetree(Board[to], z, 10, from, to));
-		else if (Board[to] > 18 && to > 90)
-			list.add(new Movetree(Board[to] + 40, z, 10, from, to, 2));
-		to = from + 11;
-		if (Board[to] > 18 && to < 90)
-			list.add(new Movetree(Board[to], z, 10, from, to));
-		else if (Board[to] > 18 && to > 90)
-			list.add(new Movetree(Board[to] + 40, z, 10, from, to, 2));
-		to = from + 20;
-		if (from < 40 && Board[to] == 0 && Board[to - 10] == 0)
-			list.add(new Movetree(2, z, 10, from, to));
-		if (lastMove.piece == 20 && lastMove.from == from + 21 && lastMove.to == from + 1)
-			list.add(new Movetree(21, z, 10, from, from + 11, 1));
-		if (lastMove.piece == 20 && lastMove.from == from + 19 && lastMove.to == from - 1)
-			list.add(new Movetree(21, z, 10, from, from + 9, 1));
-		return list;
-	}
-
-	private ArrayList<Movetree> sortedLineMovesB(int[] Board, int from, int figur, int constant, Movetree z) {
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		int to = from + constant;
-		while (Board[to] == 0) {
-			list.add(new Movetree(1, z, figur, from, to));
-			to += constant;
-		}
-		if (1 < Board[to] && Board[to] < 18)
-			list.add(new Movetree(Board[to] - figur, z, figur, from, to));
-		return list;
-	}
-
-	/**
-	 * 
-	 * @param s
-	 *            Die Position, deren mögliche Züge berechnet werden soll
-	 * @param z
-	 *            Movtree, der als Vater dieser Züge angegeben wird
-	 * @return ArrayList<Movetree>, enthält alle möglichen weissen Züge
-	 */
-
-	public ArrayList<Movetree> sortedmovesW(Position s, Movetree z) {
-		int[] Board = s.Board;
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		for (int i = 21; i < 99; i++) {
-			int f = Board[i];
-			switch (f) {
-			case 10:
-				list.addAll(sortedPawnMovesW(Board, i, z));
-				break;
-			case 11:
-				list.addAll(sortedLineMovesW(Board, i, 11, 10, z));
-				list.addAll(sortedLineMovesW(Board, i, 11, -10, z));
-				list.addAll(sortedLineMovesW(Board, i, 11, 1, z));
-				list.addAll(sortedLineMovesW(Board, i, 11, -1, z));
-				break;
-			case 12:
-				list.addAll(sortedKnightMovesW(Board, i, z));
-				break;
-			case 13:
-				list.addAll(sortedLineMovesW(Board, i, 13, 9, z));
-				list.addAll(sortedLineMovesW(Board, i, 13, -9, z));
-				list.addAll(sortedLineMovesW(Board, i, 13, 11, z));
-				list.addAll(sortedLineMovesW(Board, i, 13, -11, z));
-				break;
-			case 14:
-				list.addAll(sortedLineMovesW(Board, i, 14, 10, z));
-				list.addAll(sortedLineMovesW(Board, i, 14, -10, z));
-				list.addAll(sortedLineMovesW(Board, i, 14, 1, z));
-				list.addAll(sortedLineMovesW(Board, i, 14, -1, z));
-				list.addAll(sortedLineMovesW(Board, i, 14, 9, z));
-				list.addAll(sortedLineMovesW(Board, i, 14, -9, z));
-				list.addAll(sortedLineMovesW(Board, i, 14, 11, z));
-				list.addAll(sortedLineMovesW(Board, i, 14, -11, z));
-				break;
-			case 15:
-				list.addAll(sortedKingMovesW(s, i, z));
-				break;
-			}
-		}
-		Collections.sort(list);
-		Collections.reverse(list);
-		return list;
-	}
-
-	private ArrayList<Movetree> sortedKingMovesW(Position Pos, int from, Movetree z) {
-		int[] Board = Pos.Board;
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		int to = from + 1;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(Board[to] - 10, z, 15, from, to));
-		to = from - 1;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(Board[to] - 10, z, 15, from, to));
-		to = from + 10;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(Board[to] - 10, z, 15, from, to));
-		to = from - 10;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(Board[to] - 10, z, 15, from, to));
-		to = from + 11;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(Board[to] - 10, z, 15, from, to));
-		to = from - 11;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(Board[to] - 10, z, 15, from, to));
-		to = from + 9;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(Board[to] - 10, z, 15, from, to));
-		to = from - 9;
-		if (0 == Board[to] || Board[to] > 18)
-			list.add(new Movetree(Board[to] - 10, z, 15, from, to));
-		if (from == 25 && Pos.klrow && Board[26] == 0 && Board[27] == 0 && Board[28] == 11 && !Pos.checkB
-				&& !Pos.f1threat)
-			list.add(new Movetree(35, z, 15, from, 27, 3));
-		if (from == 25 && Pos.grrow && Board[24] == 0 && Board[23] == 0 && Board[22] == 0 && Board[21] == 11
-				&& !Pos.checkB && !Pos.d1threat)
-			list.add(new Movetree(30, z, 15, from, 23, 4));
-		return list;
-	}
-
-	private ArrayList<Movetree> sortedLineMovesW(int[] Board, int from, int figur, int constant, Movetree z) {
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		int to = from + constant;
-		while (Board[to] == 0) {
-			list.add(new Movetree(1, z, figur, from, to));
-			to += constant;
-		}
-		if (Board[to] > 18)
-			list.add(new Movetree(Board[to] - figur, z, figur, from, to));
-		return list;
-	}
-
-	private ArrayList<Movetree> sortedKnightMovesW(int[] Board, int from, Movetree z) {
-		ArrayList<Movetree> list = new ArrayList<Movetree>();
-		int to = from - 21;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 12, from, to));
-		to = from - 19;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(1 + Board[to] - 3, z, 12, from, to));
-		to = from - 12;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(2 + Board[to] - 3, z, 12, from, to));
-		to = from - 8;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(2 + Board[to] - 3, z, 12, from, to));
-		to = from + 8;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(3 + Board[to] - 3, z, 12, from, to));
-		to = from + 12;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(3 + Board[to] - 3, z, 12, from, to));
-		to = from + 19;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(4 + Board[to] - 3, z, 12, from, to));
-		to = from + 21;
-		if (Board[to] == 0 || Board[to] > 18)
-			list.add(new Movetree(4 + Board[to] - 3, z, 12, from, to));
-		return list;
-	}
 
 	private int randomnumber(int from, int to) {
 		if (from == to)

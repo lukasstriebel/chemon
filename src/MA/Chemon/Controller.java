@@ -53,7 +53,7 @@ public class Controller {
 			if (pieceHeld)
 				checkMove(where);
 			else {
-				selectedPiece = position.Board[where];
+				selectedPiece = position.board[where];
 				if (status == State.Human_versus_Machine) {
 					if (selectedPiece > 5 && selectedPiece < 18) {
 						pieceHeld = true;
@@ -112,9 +112,9 @@ public class Controller {
 	}
 
 	public void handleWhiteMove(Move m) {
-		boolean pieceTaken = position.Board[m.to] > 17;
+		boolean pieceTaken = position.board[m.to] > 17;
 		if (m.to > 90 && m.piece == 10)
-			position.Board[m.to] = promotePawn();
+			position.board[m.to] = promotePawn();
 		Movetree test = new Movetree(m);
 		oldPositions.push(position.clone());
 		test.position = position;
@@ -153,7 +153,7 @@ public class Controller {
 	}
 
 	public void handleBlackMove(Move m) {
-		boolean pieceTaken = position.Board[m.to] < 17 && position.Board[m.to] > 5;
+		boolean pieceTaken = position.board[m.to] < 17 && position.board[m.to] > 5;
 		oldPositions.push(position.clone());
 		position = engine.currentPosition;
 		Movetree test = new Movetree(m);
@@ -190,9 +190,9 @@ public class Controller {
 
 		oldPositions.push(position.clone());
 
-		boolean pieceTaken = position.Board[m.to] > 17;
+		boolean pieceTaken = position.board[m.to] > 17;
 		if (m.to > 90 && m.piece == 10)
-			position.Board[m.to] = promotePawn();
+			position.board[m.to] = promotePawn();
 		Movetree test = new Movetree(m);
 		test.position = position;
 		position = engine.executeMove(test);
@@ -278,7 +278,7 @@ public class Controller {
 						 * -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
 						 */
 
-		position.Board = i;
+		position.board = i;
 		position.grros = true;
 		position.grrow = true;
 		position.klros = true;

@@ -8,12 +8,12 @@ package MA.util;
  */
 public class Position {
 
-	public int[] Board;
+	public int[] board;
 	public Move lastMove;
 	public boolean grrow, klrow, grros, klros, mateW, mateB, checkB, checkW, d1threat, f1threat, d8threat, f8threat;
 
 	public Position(int[] board) {
-		Board = board;
+		this.board = board;
 	}
 
 	/**
@@ -22,7 +22,7 @@ public class Position {
 	public Position clone() {
 		int[] a = new int[120];
 		for (int i = 0; i < 120; i++)
-			a[i] = Board[i];
+			a[i] = board[i];
 		Position s = new Position(a);
 		s.lastMove = this.lastMove;
 		s.klros = this.klros;
@@ -34,7 +34,7 @@ public class Position {
 
 	public int whiteKing() {
 		for (int i = 21; i < 99; i++) {
-			if (Board[i] == 15)
+			if (board[i] == 15)
 				return i;
 		}
 		return -1;
@@ -42,7 +42,7 @@ public class Position {
 
 	public int blackKing() {
 		for (int i = 21; i < 99; i++) {
-			if (Board[i] == 25)
+			if (board[i] == 25)
 				return i;
 		}
 		return -1;

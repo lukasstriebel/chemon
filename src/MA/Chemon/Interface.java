@@ -167,7 +167,7 @@ public class Interface {
 
 	public void drawPieces(Graphics g) {
 		for (int i = 21; i < 99; i++) {
-			drawPiece(controller.position.Board[i], i, g);
+			drawPiece(controller.position.board[i], i, g);
 		}
 	}
 	

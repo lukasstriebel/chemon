@@ -24,7 +24,7 @@ public class Movetree implements Comparable<Movetree> {
 	public Movetree(Movetree parent, int... args) {
 		this(args);
 		this.parent = parent;
-		if (parent.position != null)
+		if (parent != null && parent.position != null)
 			position = parent.position;
 	}
 
