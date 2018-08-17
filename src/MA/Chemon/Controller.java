@@ -77,22 +77,22 @@ public class Controller {
 		}
 	}
 
-	public void checkMove(int pos) {
-		if (start != pos) {
-			Move m = new Move(selectedPiece, start, pos);
+	public void checkMove(int field) {
+		if (start != field) {
+			Move move = new Move(selectedPiece, start, field);
 			if (status == State.Human_versus_Machine) {
-				if (engine.isLegalWhite(m) && running) {
-					handleWhiteMove(m);
+				if (engine.isLegalWhite(move) && running) {
+					handleWhiteMove(move);
 					if (!engine.blackIsMated)
 						goToWork();
 				} else {
 					JOptionPane.showMessageDialog(null, "This is not a legal move!");
 				}
 			} else if (status == State.Human_versus_Human) {
-				if (whitesTurn && selectedPiece < 18 && engine.isLegalWhite(m))
-					handleWhiteMove(m);
-				else if (!whitesTurn && selectedPiece > 18 && engine.isLegalBlack(m))
-					handleBlackMove(m);
+				if (whitesTurn && selectedPiece < 18 && engine.isLegalWhite(move))
+					handleWhiteMove(move);
+				else if (!whitesTurn && selectedPiece > 18 && engine.isLegalBlack(move))
+					handleBlackMove(move);
 			}
 		}
 		pieceHeld = false;
@@ -185,47 +185,7 @@ public class Controller {
 		}
 
 	}
-	
-	public void handleMove(Move m) {
 
-		oldPositions.push(position.clone());
-
-		boolean pieceTaken = position.board[m.to] > 17;
-		if (m.to > 90 && m.piece == 10)
-			position.board[m.to] = promotePawn();
-		Movetree test = new Movetree(m);
-		test.position = position;
-		position = engine.executeMove(test);
-		test.position = position;
-		if (m.piece < 20) {
-
-		}
-		engine.handleWhiteMove(m);
-		fromW = m.from;
-		toW = m.to;
-		
-		
-		view.mark(m.from, Color.blue);
-		view.mark(m.to, Color.blue);
-		movecount++;
-		if (engine.legalMovesB(position, test).isEmpty() && engine.controlCheckB(position)) {
-			engine.blackIsMated = true;
-			running = false;
-		}
-		whitesTurn = false;
-		insertWhiteMove(m, pieceTaken);
-		if (engine.blackIsMated) {
-			running = false;
-			return;
-		}
-		if (status == State.Human_versus_Human)
-			engine.currentPosition = this.position;
-		if (status == State.Machine_versus_Machine) {
-			engine.work();
-			handleBlackMove(engine.bestMove);
-
-		}
-	}
 
 	public void insertWhiteMove(Move m, boolean b) 
 	{

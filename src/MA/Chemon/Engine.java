@@ -411,75 +411,69 @@ public class Engine {
 		}
 	}
 
-	public Position executeMove(Movetree Tree) {// liefert Position nach einem Zug
+	public Position executeMove(Movetree movetree) {// liefert Position nach einem Zug
 
-		Move pMove = Tree.move;
-		int[] board = Tree.position.board.clone();
-		Position position = Tree.position.clone();
-		board[pMove.to] = pMove.piece;
-		board[pMove.from] = 0;
-		if (pMove.piece == 15) {
+		Move move = movetree.move;
+		int[] board = movetree.position.board.clone();
+		Position position = movetree.position.clone();
+		board[move.to] = move.piece;
+		board[move.from] = 0;
+		if (move.piece == 15) {
 			position.klrow = false;
 			position.grrow = false;
-		} else if (pMove.piece == 11 && pMove.from == 21)
+		} else if (move.piece == 11 && move.from == 21)
 			position.grrow = false;
-		else if (pMove.piece == 11 && pMove.from == 28)
+		else if (move.piece == 11 && move.from == 28)
 			position.klrow = false;
 
-		if (pMove.piece == 25) {
+		if (move.piece == 25) {
 			position.klros = false;
 			position.grros = false;
-		} else if (pMove.piece == 21 && pMove.from == 91)
+		} else if (move.piece == 21 && move.from == 91)
 			position.grros = false;
-		else if (pMove.piece == 21 && pMove.from == 98)
+		else if (move.piece == 21 && move.from == 98)
 			position.klros = false;
 
-		if (pMove.addition > 0) {
-			if (pMove.addition == 1) {// en passant
-				board[pMove.to - 10] = 0;
-			}
-			if (pMove.addition == 2) { // Umwandlung
-				board[pMove.to] = 14;
-			}
-			if (pMove.addition == 3) { // kl Rochade
-				board[pMove.to - 1] = pMove.piece - 4;
-				board[pMove.to + 1] = 0;
-				position.klrow = false;
-				position.grrow = false;
-			}
-
-			if (pMove.addition == 4) { // gr Rochade
-				board[pMove.to + 1] = pMove.piece - 4;
-				board[pMove.to - 2] = 0;
-				position.klrow = false;
-				position.grrow = false;
-			}
+		if (move.addition == 1) {// en passant
+			board[move.to - 10] = 0;
+		} else if (move.addition == 2) { // Umwandlung
+			board[move.to] = 14;
+		} else if (move.addition == 3) { // kl Rochade
+			board[move.to - 1] = move.piece - 4;
+			board[move.to + 1] = 0;
+			position.klrow = false;
+			position.grrow = false;
 		}
 
-		else {
-			if (pMove.addition == -1) {// en passant
-				board[pMove.to + 10] = 0;
-			}
-
-			if (pMove.addition == -2) { // Umwandlung
-				board[pMove.to] = 24;
-			}
+		else if (move.addition == 4) { // gr Rochade
+			board[move.to + 1] = move.piece - 4;
+			board[move.to - 2] = 0;
+			position.klrow = false;
+			position.grrow = false;
 		}
 
-		if (pMove.addition == -3) { // kl Rochade
-			board[pMove.to - 1] = pMove.piece - 4;
-			board[pMove.to + 1] = 0;
+		else if (move.addition == -1) {// en passant
+			board[move.to + 10] = 0;
+		}
+
+		else if (move.addition == -2) { // Umwandlung
+			board[move.to] = 24;
+		}
+
+		else if (move.addition == -3) { // kl Rochade
+			board[move.to - 1] = move.piece - 4;
+			board[move.to + 1] = 0;
 			position.klros = false;
 			position.grros = false;
 		}
 
-		if (pMove.addition == -4) { // gr Rochade
-			board[pMove.to + 1] = pMove.piece - 4;
-			board[pMove.to - 2] = 0;
+		else if (move.addition == -4) { // gr Rochade
+			board[move.to + 1] = move.piece - 4;
+			board[move.to - 2] = 0;
 			position.klros = false;
 			position.grros = false;
 		}
-		position.lastMove = pMove;
+		position.lastMove = move;
 		position.board = board;
 		return position;
 	}
@@ -491,6 +485,7 @@ public class Engine {
 		Movetree movetree = null;
 		for (Movetree tree : list) {
 			if (tree.move.equals(m)) {
+				m.addition = tree.move.addition;
 				result = true;
 				movetree = tree;
 				break;
@@ -501,31 +496,40 @@ public class Engine {
 			movetree.position = currentPosition.clone();
 			Position pos = executeMove(movetree);
 			int i = pos.whiteKing();
-			ArrayList<Movetree> list2 = movesB(pos, movetree);
-			for (Movetree tree2 : list2) {
-				if (tree2.to == i) {
-					result = false;
-					break;
-				}
-			}
+			ArrayList<Movetree> list2 = movesBlack(pos, movetree);
+			for (Movetree tree2 : list2)
+				if (tree2.to == i)
+					return false;
 		}
 
 		return result;
 	}
 
 	public boolean isLegalBlack(Move m) {
-		ArrayList<Movetree> l = movesB(currentPosition, new Movetree(m));
-		Move compare;
-		for (Movetree t : l) {
-			compare = t.move;
-			if (m.piece == compare.piece && m.from == compare.from && m.to == compare.to) {
-				if (compare.addition < 0)
-					m.addition = compare.addition;
-				return true;
+		ArrayList<Movetree> l = movesBlack(currentPosition, new Movetree(m));
+
+		boolean result = false;
+		Movetree movetree = null;
+		for (Movetree tree : l) {
+			if (tree.move.equals(m)) {
+				m.addition = tree.move.addition;
+				result = true;
+				movetree = tree;
+				break;
 			}
 		}
 
-		return false;
+		if (result) {
+			movetree.position = currentPosition.clone();
+			Position pos = executeMove(movetree);
+			int blackKing = pos.blackKing();
+			ArrayList<Movetree> list2 = movesWhite(pos, movetree);
+			for (Movetree tree2 : list2)
+				if (tree2.to == blackKing)
+					return false;
+		}
+
+		return result;
 	}
 
 	public boolean controlCheckB(Position test) {
@@ -553,7 +557,7 @@ public class Engine {
 	}
 
 	public boolean controlCheckW(Position test) {
-		ArrayList<Movetree> list = movesB(test, testTree);
+		ArrayList<Movetree> list = movesBlack(test, testTree);
 		int whiteKingPosition = 0;
 		test.d1threat = false;
 		test.f1threat = false;
@@ -576,13 +580,13 @@ public class Engine {
 		return false;
 	}
 
-	public void handleWhiteMove(Move pMove) {
-		lastMove = pMove;
-		Movetree m = new Movetree(pMove);
-		m.position = currentPosition;
-		currentPosition = executeMove(m);
+	public void handleWhiteMove(Move move) {
+		lastMove = move;
+		Movetree currentMove = new Movetree(move);
+		currentMove.position = currentPosition;
+		currentPosition = executeMove(currentMove);
 		numberOfMoves++;
-		startTree = new Movetree(pMove);
+		startTree = new Movetree(move);
 		startTree.position = currentPosition;
 		if (controlCheckW(currentPosition))
 			whiteIsChecked = true;
@@ -601,7 +605,8 @@ public class Engine {
 	 * -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	 * -1, }; Move parent = new Move(10, 54, 65); Movegenerator g = new
 	 * Movegenerator(i); g.lastMove = parent; Position position = new Position(i);
-	 * position.lastMove = parent; parent.st = position; Position s2 = g.executeMove(parent); }
+	 * position.lastMove = parent; parent.st = position; Position s2 =
+	 * g.executeMove(parent); }
 	 */
 
 	/**
@@ -616,7 +621,7 @@ public class Engine {
 		if (legalMovesW(movetree.position, movetree).size() == 0)
 			return 10000000;
 		int Insgesamt = evaluatePosition(movetree.position) + evaluateMaterial(movetree.position.board);
-		Insgesamt += movesB(movetree.position, movetree).size();
+		Insgesamt += movesBlack(movetree.position, movetree).size();
 		analyzedPositions++;
 		return Insgesamt;
 	}
@@ -648,7 +653,7 @@ public class Engine {
 			Position += 10;
 		else if (posKB % 10 == 5 || posKB % 10 == 3)
 			Position += 8;
-		ArrayList<Movetree> list = movesB(position, testTree);
+		ArrayList<Movetree> list = movesBlack(position, testTree);
 		for (Movetree m : list) {
 			int compare = m.move.to;
 			if (compare == posKW)
@@ -703,7 +708,7 @@ public class Engine {
 	 *            Movtree, der als Vater dieser Züge angegeben wird
 	 * @return ArrayList<Movetree>, enthält alle möglichen schwarzen Züge
 	 */
-	public ArrayList<Movetree> movesB(Position position, Movetree movetreee) {
+	public ArrayList<Movetree> movesBlack(Position position, Movetree movetreee) {
 		int[] board = position.board;
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
 		for (int i = 21; i < 99; i++) {
@@ -856,7 +861,7 @@ public class Engine {
 
 	public ArrayList<Movetree> legalMovesB(Position position, Movetree parent) {
 		position.checkB = controlCheckB(position);
-		ArrayList<Movetree> raw = movesB(position, parent);
+		ArrayList<Movetree> raw = movesBlack(position, parent);
 		for (int i = 0; i < raw.size(); i++) {
 			Movetree m = raw.get(i);
 			Position after = executeMove(m);
@@ -884,7 +889,7 @@ public class Engine {
 
 	public ArrayList<Movetree> sortedadmovesB(Position position, Movetree parent) {
 		position.checkB = controlCheckB(position);
-		ArrayList<Movetree> raw = movesB(position, parent);
+		ArrayList<Movetree> raw = movesBlack(position, parent);
 		for (int i = 0; i < raw.size(); i++) {
 			Movetree m = raw.get(i);
 			Position after = executeMove(m);
@@ -1055,7 +1060,6 @@ public class Engine {
 			list.add(new Movetree(parent, 10, from, from + 9, 1));
 		return list;
 	}
-
 
 	private int randomnumber(int from, int to) {
 		if (from == to)
