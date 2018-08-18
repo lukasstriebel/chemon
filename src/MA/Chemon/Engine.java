@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 import MA.Openings.English;
 import MA.Openings.Kings_Indian;
 import MA.Openings.Opening;
+import MA.Openings.Sicilian;
 import MA.Openings.Slav;
 import MA.Openings.Spanish;
 import MA.util.Move;
@@ -94,9 +95,6 @@ public class Engine {
 			else if (controller.searchWith == SearchAlgorithm.PrincipalVariation) {
 				analyzationDepth = 3;
 				d = PrincipalVariation(m, 2, -2000, 2000);
-			} else if (controller.searchWith == SearchAlgorithm.Zugvorsortierung) {
-				analyzationDepth = 3;
-				d = PrincipalVariationSorted(m, 2, -2000, 2000);
 			}
 			m.value = d;
 		}
@@ -183,56 +181,6 @@ public class Engine {
 			m.children = legalMovesW(m.position, m);
 		else
 			m.children = legalMovesB(m.position, m);
-		if (!m.children.isEmpty()) {
-			for (Movetree child : m.children) {
-				child.position = executeMove(child);
-				if (PVfound) {
-					value = PrincipalVariation(child, pDepth - 1, -alpha - 1, -alpha);
-					if (value > alpha && value < beta)
-						value = PrincipalVariation(child, pDepth - 1, -beta, -alpha);
-				} else
-					value = PrincipalVariation(child, pDepth - 1, -beta, -alpha);
-				if (pDepth % 2 == analyzationDepth % 2) {
-					if (value <= beta) {
-						m.children.clear();
-						return beta;
-					}
-					if (value < alpha) {
-						alpha = value;
-						PVfound = true;
-					}
-				} else {
-					if (value >= beta) {
-						m.children.clear();
-						return beta;
-					}
-					if (value > alpha) {
-						alpha = value;
-						PVfound = true;
-					}
-				}
-			}
-			m.children.clear();
-			return alpha;
-		} else { // keine Züge möglich
-			if (pDepth % 2 == analyzationDepth % 2 && controlCheckB(m.position))
-				return 1000; // Weiss am Züge und weisser König im Schach(=Matt)
-			else if ((pDepth + 1) % 2 == analyzationDepth % 2 && controlCheckW(m.position))
-				return -1000;// Schwarz am Züge und schwarzer König im Schach(=Matt)
-			else // Patt
-				return 0;
-		}
-	}
-
-	private int PrincipalVariationSorted(Movetree m, int pDepth, int alpha, int beta) {
-		boolean PVfound = false;
-		int value;
-		if (pDepth == 0)
-			return evaluateMovetree(m);
-		if (pDepth % 2 == analyzationDepth % 2)
-			m.children = sortedadmovesW(m.position, m);
-		else
-			m.children = sortedadmovesB(m.position, m);
 		if (!m.children.isEmpty()) {
 			for (Movetree child : m.children) {
 				child.position = executeMove(child);
@@ -392,10 +340,10 @@ public class Engine {
 					playOpening();
 				} else if (lastMove.from == 35 && lastMove.to == 55) {
 					inOpening = true;
-					// if (Zufall < 0.5)
-					// Opening = new Sicilian();
-					// else
-					opening = new Spanish();
+					if (Zufall < 0.5)
+						 opening = new Sicilian();
+					else
+						opening = new Spanish();
 					playOpening();
 				} else if (lastMove.from == 34 && lastMove.to == 54) {
 					inOpening = true;
@@ -594,29 +542,6 @@ public class Engine {
 			whiteIsChecked = false;
 	}
 
-	/*
-	 * public static void main(String[] a) {
-	 * 
-	 * int[] i = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	 * -1, -1, -1, -1, -1, 11, 12, 13, 14, 15, 13, 12, 11, -1, -1, 10, 10, 10, 10,
-	 * 0, 10, 10, 10, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 10, 0, 0,
-	 * 0, -1, -1, 0, 0, 0, 0, 20, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1,
-	 * 20, 20, 20, 20, 0, 20, 20, 20, -1, -1, 21, 22, 23, 24, 25, 23, 22, 21, -1,
-	 * -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	 * -1, }; Move parent = new Move(10, 54, 65); Movegenerator g = new
-	 * Movegenerator(i); g.lastMove = parent; Position position = new Position(i);
-	 * position.lastMove = parent; parent.st = position; Position s2 =
-	 * g.executeMove(parent); }
-	 */
-
-	/**
-	 * liefert eine Bewertung eines Movetrees
-	 * 
-	 * @param movetree
-	 *            : der zu bewertende Movetree
-	 * @return double wert, die Bewertung
-	 */
-
 	public int evaluateMovetree(Movetree movetree) {
 		if (legalMovesW(movetree.position, movetree).size() == 0)
 			return 10000000;
@@ -698,16 +623,6 @@ public class Engine {
 		return Material;
 	}
 
-	// Zuggenerator
-
-	/**
-	 * 
-	 * @param position
-	 *            Die Position, deren mögliche Züge berechnet werden soll
-	 * @param movetreee
-	 *            Movtree, der als Vater dieser Züge angegeben wird
-	 * @return ArrayList<Movetree>, enthält alle möglichen schwarzen Züge
-	 */
 	public ArrayList<Movetree> movesBlack(Position position, Movetree movetreee) {
 		int[] board = position.board;
 		ArrayList<Movetree> list = new ArrayList<Movetree>();
@@ -746,12 +661,7 @@ public class Engine {
 				list.addAll(kingmovesB(position, i, movetreee));
 				break;
 			}
-		} /*
-			 * for(Movetree m:list) { m.Move.Position = parent.Position; Position afterwards
-			 * = executeMove(m.Move); m.Position=afterwards; if(controlCheckW(afterwards))
-			 * list.remove(m); } list.trimToSize(); if(list.isEmpty()) list.add(new
-			 * Movetree(new Move(20,0,0)));
-			 */
+		} 
 		return list;
 	}
 
@@ -874,34 +784,6 @@ public class Engine {
 	}
 
 	public ArrayList<Movetree> legalMovesW(Position position, Movetree parent) {
-		position.checkW = controlCheckW(position);
-		ArrayList<Movetree> raw = movesWhite(position, parent);
-		for (int i = 0; i < raw.size(); i++) {
-			Movetree m = raw.get(i);
-			Position after = executeMove(m);
-			if (controlCheckW(after)) {
-				raw.remove(m);
-				i--;
-			}
-		}
-		return raw;
-	}
-
-	public ArrayList<Movetree> sortedadmovesB(Position position, Movetree parent) {
-		position.checkB = controlCheckB(position);
-		ArrayList<Movetree> raw = movesBlack(position, parent);
-		for (int i = 0; i < raw.size(); i++) {
-			Movetree m = raw.get(i);
-			Position after = executeMove(m);
-			if (controlCheckB(after)) {
-				raw.remove(m);
-				i--;
-			}
-		}
-		return raw;
-	}
-
-	public ArrayList<Movetree> sortedadmovesW(Position position, Movetree parent) {
 		position.checkW = controlCheckW(position);
 		ArrayList<Movetree> raw = movesWhite(position, parent);
 		for (int i = 0; i < raw.size(); i++) {

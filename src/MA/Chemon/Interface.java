@@ -15,8 +15,8 @@ public class Interface {
 
 	private final int HORIZONTAL_OFFSET = 40, VERTICAL_OFFSET = 40;
 	private final int SQUARE_LENGTH = 100;
-	String[] gifPath = { "b", "w", "bpb", "bpw", "brb", "brw", "bnb", "bnw", "bbb", "bbw", "bqb", "bqw", "bkb", "bkw",
-			"wpb", "wpw", "wrb", "wrw", "wnb", "wnw", "wbb", "wbw", "wqb", "wqw", "wkb", "wkw" };
+	String[] gifPath = { "b", "w", "wpb", "wpw", "wrb", "wrw", "wnb", "wnw", "wbb", "wbw", "wqb", "wqw", "wkb", "wkw",
+			 "bpb", "bpw", "brb", "brw", "bnb", "bnw", "bbb", "bbw", "bqb", "bqw", "bkb", "bkw" };
 	Image[] pictures = new Image[26];
 	boolean[] boardColors;
 	String path;
@@ -57,14 +57,14 @@ public class Interface {
 
 		public void paintComponent(Graphics graphics) {
 			super.paintComponent(graphics); 
+			//frame.repaint();
 			l1.repaint();
 			l2.repaint();
 			l3.repaint();
 			l4.repaint();
 			l5.repaint();
 			l6.repaint();
-			drawBoard(graphics);
-			drawPieces(graphics);
+			drawBoard(graphics, 0);
 		}
 	}
 
@@ -86,18 +86,18 @@ public class Interface {
 			}
 		});
 		l1 = new JLabel("© 2010 - 2018 Lukas Striebel");
-		l2 = new JLabel("Chemon 1.6");
+		l2 = new JLabel("");
 		l3 = new JLabel("Partieverlauf");
 		l4 = new JLabel("Stellungsbewertung");
 		l5 = new JLabel("Elapsed Time:");
 		l6 = new JLabel("Elapsed Time total:");
 		l7 = new JLabel("");
-		l1.setForeground(Color.WHITE);
-		l2.setForeground(Color.WHITE);
-		l3.setForeground(Color.WHITE);
-		l4.setForeground(Color.WHITE);
-		l5.setForeground(Color.WHITE);
-		l6.setForeground(Color.WHITE);
+		l1.setForeground(Color.BLACK);
+		l2.setForeground(Color.BLACK);
+		l3.setForeground(Color.BLACK);
+		l4.setForeground(Color.BLACK);
+		l5.setForeground(Color.BLACK);
+		l6.setForeground(Color.BLACK);
 		l1.setBounds(340, (int) 9.25 * SQUARE_LENGTH, 200, 25);
 		l2.setBounds(4 * SQUARE_LENGTH, 10, 100, 25);
 		l3.setBounds(SQUARE_LENGTH * 8 + 120, SQUARE_LENGTH, 200, SQUARE_LENGTH / 4);
@@ -164,93 +164,49 @@ public class Interface {
 		return VERTICAL_OFFSET + (9 - row) * SQUARE_LENGTH;
 	}
 
-
-	public void drawPieces(Graphics g) {
+	public void drawBoard(Graphics graphics, int offset) {	
+		graphics.setColor(new Color(128, 64, 0));
+		if(offset == 0)
+			graphics.fillRect(HORIZONTAL_OFFSET-20, VERTICAL_OFFSET-20, 40 + 8 * SQUARE_LENGTH, 40 + 8 * SQUARE_LENGTH);
 		for (int i = 21; i < 99; i++) {
-			drawPiece(controller.position.board[i], i, g);
-		}
-	}
-	
-	private void drawPiece(int piece, int field, Graphics graphics) {// eine Figur
-																// wird
-																// gezeichnet
-		int x = fieldToHorizontalPosition(field), y = fieldToVerticalPosition(field);
-		if (piece == 20 && !boardColors[field - 21])
-			graphics.drawImage(pictures[2], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 20 && boardColors[field - 21])
-			graphics.drawImage(pictures[3], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 21 && !boardColors[field - 21])
-			graphics.drawImage(pictures[4], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 21 && boardColors[field - 21])
-			graphics.drawImage(pictures[5], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 22 && !boardColors[field - 21])
-			graphics.drawImage(pictures[6], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 22 && boardColors[field - 21])
-			graphics.drawImage(pictures[7], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 23 && !boardColors[field - 21])
-			graphics.drawImage(pictures[8], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 23 && boardColors[field - 21])
-			graphics.drawImage(pictures[9], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 24 && !boardColors[field - 21])
-			graphics.drawImage(pictures[10], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 24 && boardColors[field - 21])
-			graphics.drawImage(pictures[11], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 25 && !boardColors[field - 21])
-			graphics.drawImage(pictures[12], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 25 && boardColors[field - 21])
-			graphics.drawImage(pictures[13], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 10 && !boardColors[field - 21])
-			graphics.drawImage(pictures[14], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 10 && boardColors[field - 21])
-			graphics.drawImage(pictures[15], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 11 && !boardColors[field - 21])
-			graphics.drawImage(pictures[16], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 11 && boardColors[field - 21])
-			graphics.drawImage(pictures[17], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 12 && !boardColors[field - 21])
-			graphics.drawImage(pictures[18], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 12 && boardColors[field - 21])
-			graphics.drawImage(pictures[19], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 13 && !boardColors[field - 21])
-			graphics.drawImage(pictures[20], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 13 && boardColors[field - 21])
-			graphics.drawImage(pictures[21], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 14 && !boardColors[field - 21])
-			graphics.drawImage(pictures[22], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 14 && boardColors[field - 21])
-			graphics.drawImage(pictures[23], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 15 && !boardColors[field - 21])
-			graphics.drawImage(pictures[24], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 15 && boardColors[field - 21])
-			graphics.drawImage(pictures[25], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-		if (piece == 0)
-			drawSquare(field, graphics);
-	}
-
-	private void drawBoard(Graphics g) {// das ganze Brett wird gezeichnet
-		for (int i = 21; i < 99; i++) {
-			drawSquare(i, g);
+			int piece = controller.position.board[i];
+			if(piece == 0)
+				drawSquare(i, graphics, offset);
+			else if(piece > 0)
+				drawPiece(controller.position.board[i], i, graphics, offset);
 		}
 	}
 
-	private void drawSquare(int square, Graphics g) {// ein Feld wird gezeichnet
+	private void drawSquare(int square, Graphics graphics, int offset) {
+		int offsetx = offset == 0 ? 0 : 3;
 		int x = fieldToHorizontalPosition(square), y = fieldToVerticalPosition(square);
 		if (x != -1 && y != -1) {
 			if (boardColors[square - 21])
-				g.drawImage(pictures[1], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
+				graphics.drawImage(pictures[1], x+offsetx, offset+y, SQUARE_LENGTH, SQUARE_LENGTH, null);
 			else
-				g.drawImage(pictures[0], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
+				graphics.drawImage(pictures[0], x+offsetx, offset+y, SQUARE_LENGTH, SQUARE_LENGTH, null);
 		}
+	}
+	
+	private void drawPiece(int piece, int field, Graphics graphics, int offset) {
+		int offsetx = offset == 0 ? 0 : 3;
+		int x = fieldToHorizontalPosition(field), y = fieldToVerticalPosition(field);
+		if(piece >= 20)
+			piece -= 4;
+		int blackSquare = boardColors[field - 21] ? 1 : 0;
+		int imageIndex = piece * 2 - 18 + blackSquare;
+		graphics.drawImage(pictures[imageIndex], x+offsetx, offset+y, SQUARE_LENGTH, SQUARE_LENGTH, null);
+
 	}
 
 
 	public void mark(int field, Color colour) {
-		int offset = 50;
+		int offset = 48;
 		int x = fieldToHorizontalPosition(field), y = fieldToVerticalPosition(field);
 		Graphics graphics = frame.getGraphics();
 		graphics.setColor(colour);
 		graphics.drawRect(x, offset+y, SQUARE_LENGTH, SQUARE_LENGTH);
-		graphics.drawRect(x + 1, y + 1+ offset, SQUARE_LENGTH - 2, SQUARE_LENGTH - 2);
+		graphics.drawRect(x + 1, y + 1 + offset, SQUARE_LENGTH - 2, SQUARE_LENGTH - 2);
 		graphics.drawRect(x + 2, y + 2 + offset, SQUARE_LENGTH - 4, SQUARE_LENGTH - 4);
 		graphics.drawRect(x + 3, y + 3 + offset, SQUARE_LENGTH - 6, SQUARE_LENGTH - 6);
 	}
@@ -359,12 +315,6 @@ public class Interface {
 				options.dispose();
 			}
 		});
-	}
-
-	public void drawBackground() {
-		Graphics graphics = frame.getGraphics();
-		graphics.setColor(new Color(128, 64, 0));
-		graphics.fillRect(80, 80, 40 + 8 * SQUARE_LENGTH, 40 + 8 * SQUARE_LENGTH);
 	}
 
 	public void movesound() { // spielt einen Ton ab um den Spieler über einen Move zu informieren

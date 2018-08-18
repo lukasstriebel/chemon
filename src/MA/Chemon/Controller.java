@@ -31,7 +31,7 @@ public class Controller {
 	String notation;
 	double time;
 	SearchAlgorithm searchWith = SearchAlgorithm.AlphaBeta;
-	State status = State.Human_versus_Human;
+	State status = State.Human_versus_Machine;
 
 	public Controller() {
 
@@ -84,31 +84,30 @@ public class Controller {
 				if (engine.isLegalWhite(move) && running) {
 					handleWhiteMove(move);
 					if (!engine.blackIsMated)
-						goToWork();
-				} else {
+						evaluateBestMove();
+				} else 
 					JOptionPane.showMessageDialog(null, "This is not a legal move!");
-				}
-			} else if (status == State.Human_versus_Human) {
+			} else if (status == State.Human_versus_Human) 
 				if (whitesTurn && selectedPiece < 18 && engine.isLegalWhite(move))
 					handleWhiteMove(move);
 				else if (!whitesTurn && selectedPiece > 18 && engine.isLegalBlack(move))
 					handleBlackMove(move);
-			}
 		}
 		pieceHeld = false;
 		start = 0;
 		selectedPiece = 0;
+		view.frame.repaint();
 	}
 
-	public void goToWork() {
+	public void evaluateBestMove() {
 		double start = System.currentTimeMillis();
 		engine.work();// Zuggenerator informieren
-		Move m = engine.bestMove;// besten Zug holen
+		Move bestMove = engine.bestMove;// besten Zug holen
 		double end = System.currentTimeMillis();
 		view.l5.setText("Elapsed Time: " + (end - start) / 1000);
 		time += (end - start) / 1000;
 		view.l6.setText("Elapsed Time total: " + time);
-		handleBlackMove(m);// Zug ausführen
+		handleBlackMove(bestMove);// Zug ausführen
 	}
 
 	public void handleWhiteMove(Move m) {
@@ -126,6 +125,7 @@ public class Controller {
 		
 
 		//view.panel.paintComponent(view.frame.getGraphics());
+		//view.panel.paintComponent(view.frame.getGraphics());
 		view.frame.repaint();
 		view.movesound();
 		
@@ -133,6 +133,7 @@ public class Controller {
 		view.mark(m.to, Color.blue);
 		
 		movecount++;
+		view.drawBoard(view.frame.getGraphics(), 49);
 		if (engine.legalMovesB(position, test).isEmpty() && engine.controlCheckB(position)) {
 			engine.blackIsMated = true;
 			running = false;
@@ -183,9 +184,7 @@ public class Controller {
 			handleWhiteMove(engine.bestMove);
 
 		}
-
 	}
-
 
 	public void insertWhiteMove(Move m, boolean b) 
 	{
@@ -219,26 +218,14 @@ public class Controller {
 		view.evaluationTextArea.append(engine.evaluateMovetree(engine.startTree) + "\n");
 	}
 
-	/**
-	 * Das Brett wird neu aufgestellt
-	 */
-
 	public void setBoardUp() {
-		int[] i = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 11, 12, 13, 14,
+		int[] board = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 11, 12, 13, 14,
 				15, 13, 12, 11, -1, -1, 10, 10, 10, 10, 10, 10, 10, 10, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0,
 				0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 20, 20, 20, 20,
 				20, 20, 20, 20, -1, -1, 21, 22, 23, 24, 25, 23, 22, 21, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 				-1, -1, -1, -1, -1, -1, -1, -1,
-				-1, };/*
-						 * int[] i = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-						 * -1, -1, -1, -1, -1, 11, 0, 0, 0, 0, 11, 15, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0,
-						 * 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0,
-						 * 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0,
-						 * 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-						 * -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
-						 */
-
-		position.board = i;
+				-1, };
+		position.board = board;
 		position.grros = true;
 		position.grrow = true;
 		position.klros = true;
@@ -247,10 +234,6 @@ public class Controller {
 		oldPositions.push(position.clone());
 	}
 
-	/**
-	 * 
-	 * @param msec
-	 */
 	public void sleep(int msec) {
 		try {
 			Thread.sleep(msec);
