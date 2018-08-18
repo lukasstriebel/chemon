@@ -122,18 +122,13 @@ public class Controller {
 		engine.handleWhiteMove(m);
 		fromW = m.from;
 		toW = m.to;
-		
-
-		//view.panel.paintComponent(view.frame.getGraphics());
-		//view.panel.paintComponent(view.frame.getGraphics());
-		view.frame.repaint();
+		view.frame.paint(view.frame.getGraphics());
 		view.movesound();
 		
 		view.mark(m.from, Color.blue);
 		view.mark(m.to, Color.blue);
 		
 		movecount++;
-		view.drawBoard(view.frame.getGraphics(), 49);
 		if (engine.legalMovesB(position, test).isEmpty() && engine.controlCheckB(position)) {
 			engine.blackIsMated = true;
 			running = false;

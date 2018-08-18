@@ -57,14 +57,13 @@ public class Interface {
 
 		public void paintComponent(Graphics graphics) {
 			super.paintComponent(graphics); 
-			//frame.repaint();
 			l1.repaint();
 			l2.repaint();
 			l3.repaint();
 			l4.repaint();
 			l5.repaint();
 			l6.repaint();
-			drawBoard(graphics, 0);
+			drawBoard(graphics);
 		}
 	}
 
@@ -72,7 +71,6 @@ public class Interface {
 
 		setColors();
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		System.out.println(dim);
 		frame = new JFrame("Chemon");
 		frame.setSize(dim);
 		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
@@ -136,7 +134,6 @@ public class Interface {
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
-		System.out.println(path);
 		frame.setVisible(true);
 		panel.setLocation(0, 0);
 	}
@@ -164,38 +161,35 @@ public class Interface {
 		return VERTICAL_OFFSET + (9 - row) * SQUARE_LENGTH;
 	}
 
-	public void drawBoard(Graphics graphics, int offset) {	
+	public void drawBoard(Graphics graphics) {	
 		graphics.setColor(new Color(128, 64, 0));
-		if(offset == 0)
-			graphics.fillRect(HORIZONTAL_OFFSET-20, VERTICAL_OFFSET-20, 40 + 8 * SQUARE_LENGTH, 40 + 8 * SQUARE_LENGTH);
+		graphics.fillRect(HORIZONTAL_OFFSET-20, VERTICAL_OFFSET-20, 40 + 8 * SQUARE_LENGTH, 40 + 8 * SQUARE_LENGTH);
 		for (int i = 21; i < 99; i++) {
 			int piece = controller.position.board[i];
 			if(piece == 0)
-				drawSquare(i, graphics, offset);
+				drawSquare(i, graphics);
 			else if(piece > 0)
-				drawPiece(controller.position.board[i], i, graphics, offset);
+				drawPiece(controller.position.board[i], i, graphics);
 		}
 	}
 
-	private void drawSquare(int square, Graphics graphics, int offset) {
-		int offsetx = offset == 0 ? 0 : 3;
+	private void drawSquare(int square, Graphics graphics) {
 		int x = fieldToHorizontalPosition(square), y = fieldToVerticalPosition(square);
 		if (x != -1 && y != -1) {
 			if (boardColors[square - 21])
-				graphics.drawImage(pictures[1], x+offsetx, offset+y, SQUARE_LENGTH, SQUARE_LENGTH, null);
+				graphics.drawImage(pictures[1], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
 			else
-				graphics.drawImage(pictures[0], x+offsetx, offset+y, SQUARE_LENGTH, SQUARE_LENGTH, null);
+				graphics.drawImage(pictures[0], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
 		}
 	}
 	
-	private void drawPiece(int piece, int field, Graphics graphics, int offset) {
-		int offsetx = offset == 0 ? 0 : 3;
+	private void drawPiece(int piece, int field, Graphics graphics) {
 		int x = fieldToHorizontalPosition(field), y = fieldToVerticalPosition(field);
 		if(piece >= 20)
 			piece -= 4;
 		int blackSquare = boardColors[field - 21] ? 1 : 0;
 		int imageIndex = piece * 2 - 18 + blackSquare;
-		graphics.drawImage(pictures[imageIndex], x+offsetx, offset+y, SQUARE_LENGTH, SQUARE_LENGTH, null);
+		graphics.drawImage(pictures[imageIndex], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
 
 	}
 
