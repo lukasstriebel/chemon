@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import MA.util.Move;
-import MA.util.Movetree;
+import MA.util.MoveTree;
 import MA.util.Position;
 import MA.util.SearchAlgorithm;
 import MA.util.State;
@@ -26,16 +26,16 @@ public class Controller {
 	Interface view; // View
 	Stack<Position> oldPositions;
 	Position position = new Position(new int[120]);
-	int start, selectedPiece, fromB, toB, fromW, toW, movecount;
+	int start, selectedPiece,  movecount;
 	boolean pieceHeld, running = true, isWhite, humanvsmachine = true, whitesTurn;
 	String notation;
 	double time;
 	SearchAlgorithm searchWith = SearchAlgorithm.AlphaBeta;
-	State status = State.Human_versus_Human;
+	State status = State.Human_versus_Machine;
 
 	public Controller() {
 
-		setBoardUp();
+		initializeBoard();
 		engine = new Engine(position);
 		engine.controller = this;
 		view = new Interface();
@@ -82,16 +82,16 @@ public class Controller {
 			Move move = new Move(selectedPiece, start, field);
 			if (status == State.Human_versus_Machine) {
 				if (engine.isLegalWhite(move) && running) {
-					handleWhiteMove(move);
+					handleMove(move);
 					if (!engine.blackIsMated)
 						evaluateBestMove();
 				} else 
 					JOptionPane.showMessageDialog(null, "This is not a legal move!");
 			} else if (status == State.Human_versus_Human) 
 				if (whitesTurn && selectedPiece < 18 && engine.isLegalWhite(move))
-					handleWhiteMove(move);
+					handleMove(move);
 				else if (!whitesTurn && selectedPiece > 18 && engine.isLegalBlack(move))
-					handleBlackMove(move);
+					handleMove(move);
 		}
 		pieceHeld = false;
 		start = 0;
@@ -101,83 +101,58 @@ public class Controller {
 
 	public void evaluateBestMove() {
 		double start = System.currentTimeMillis();
-		engine.findBestMove();// Zuggenerator informieren
-		Move bestMove = engine.bestMove;// besten Zug holen
+		engine.findBestMove();
+		Move bestMove = engine.bestMove;
 		double end = System.currentTimeMillis();
 		view.l5.setText("Elapsed Time: " + (end - start) / 1000);
 		time += (end - start) / 1000;
 		view.l6.setText("Elapsed Time total: " + time);
-		handleBlackMove(bestMove);// Zug ausführen
+		handleMove(bestMove);
 	}
 
-	public void handleWhiteMove(Move m) {
-		boolean pieceTaken = position.board[m.to] > 17;
-		if (m.to > 90 && m.piece == 10)
-			position.board[m.to] = promotePawn();
-		Movetree test = new Movetree(m);
-		oldPositions.push(position.clone());
-		test.position = position;
-		position = engine.executeMove(test);
-		test.position = position;
-		engine.handleWhiteMove(m);
-		fromW = m.from;
-		toW = m.to;
-		view.frame.paint(view.frame.getGraphics());
-		view.movesound();
-		
-		view.mark(m.from, Color.blue);
-		view.mark(m.to, Color.blue);
-		
-		movecount++;
-		if (engine.legalMovesB(position, test).isEmpty()) {
-			if(engine.controlCheckB(position))
-				engine.blackIsMated = true;
-			
-			running = false;
-		}
-		whitesTurn = false;
-		insertWhiteMove(m, pieceTaken);
-		if (status == State.Human_versus_Human)
-			engine.currentPosition = this.position;
-		if (status == State.Machine_versus_Machine) {
-			engine.findBestMove();
-			handleBlackMove(engine.bestMove);
 
-		}
-	}
-
-	public void handleBlackMove(Move m) {
-		boolean pieceTaken = position.board[m.to] < 17 && position.board[m.to] > 5;
+	public void handleMove(Move move) {
+		boolean pieceTaken = position.board[move.to] > 0;
 		oldPositions.push(position.clone());
 		position = engine.currentPosition;
-		Movetree test = new Movetree(m);
+		MoveTree test = new MoveTree(move);
 		test.position = position;
 		position = engine.executeMove(test);
 		test.position = position;
-		fromB = m.from;
-		toB = m.to;
-		//view.panel.paintComponent(view.frame.getGraphics());
-		view.frame.repaint();
+		view.frame.paint(view.frame.getGraphics());
 		view.movesound();
 
-		view.mark(m.from, Color.yellow);
-		view.mark(m.to, Color.yellow);
+		view.mark(move.from, Color.blue);
+		view.mark(move.to, Color.blue);
 		
-		if (engine.legalMovesW(position, test).isEmpty()) {
-			if(engine.controlCheckW(position))
-				engine.whiteIsMated = true;
-			running = false;
+		if (whitesTurn) {
+			if (engine.legalMovesB(position, test).isEmpty()) {
+				if (engine.blackIsChecked(position))
+					engine.blackIsMated = true;
+
+				running = false;
+			}
+			engine.handleWhiteMove(move);
+			movecount++;
+			insertWhiteMove(move, pieceTaken);			
+		} else {
+			if (engine.legalMovesW(position, test).isEmpty()) {
+				if (engine.whiteIsChecked(position))
+					engine.whiteIsMated = true;
+				running = false;
+			}
+			insertBlackMove(move, pieceTaken);
 		}
-		insertBlackMove(m, pieceTaken);
-		whitesTurn = true;
+		whitesTurn = !whitesTurn;
 
 		if (status == State.Human_versus_Human)
 			engine.currentPosition = this.position;
 		if (status == State.Machine_versus_Machine) {
 			engine.findBestMove();
-			handleWhiteMove(engine.bestMove);
+			handleMove(engine.bestMove);
 
 		}
+		
 	}
 
 	public void insertWhiteMove(Move move, boolean pieceTaken) 
@@ -189,7 +164,7 @@ public class Controller {
 				JOptionPane.showMessageDialog(null, "Gratulation! Sie haben gewonnen.");
 			else
 				JOptionPane.showMessageDialog(null, "Schachmatt. Weiss hat gewonnen.");
-		} else if (engine.controlCheckB(engine.currentPosition))
+		} else if (engine.blackIsChecked(engine.currentPosition))
 			notation += "+";
 		view.movesTextArea.append(notation);
 	}
@@ -204,7 +179,7 @@ public class Controller {
 			else
 				JOptionPane.showMessageDialog(null, "Schachmatt. Schwarz hat gewonnen.");
 
-		} else if (engine.controlCheckW(engine.currentPosition))
+		} else if (engine.whiteIsChecked(engine.currentPosition))
 			notation += "+";
 		notation += "\n";
 		view.movesTextArea.append(notation);
@@ -212,7 +187,7 @@ public class Controller {
 		view.evaluationTextArea.append(engine.evaluateMovetree(engine.startTree) + "\n");
 	}
 
-	public void setBoardUp() {
+	public void initializeBoard() {
 		int[] board = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 11, 12, 13, 14,
 				15, 13, 12, 11, -1, -1, 10, 10, 10, 10, 10, 10, 10, 10, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0,
 				0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 20, 20, 20, 20,
@@ -224,6 +199,8 @@ public class Controller {
 		position.grrow = true;
 		position.klros = true;
 		position.klrow = true;
+		position.setBlackKing(95);
+		position.setWhiteKing(25);
 		oldPositions = new Stack<Position>();
 		oldPositions.push(position.clone());
 	}
@@ -275,14 +252,10 @@ public class Controller {
 	}
 
 	public void newGame() {
-		setBoardUp();
+		initializeBoard();
 		view.movesTextArea.setText("");
 		view.evaluationTextArea.setText("");
 		running = true;
-		fromB = 0;
-		toB = 0;
-		fromW = 0;
-		toW = 0;
 		movecount = 0;
 		pieceHeld = false;
 		start = 0;
@@ -293,7 +266,7 @@ public class Controller {
 		engine.controller = this;
 		if (status == State.Machine_versus_Machine) {
 			engine.findBestMove();
-			handleWhiteMove(engine.bestMove);
+			handleMove(engine.bestMove);
 		}
 	}
 

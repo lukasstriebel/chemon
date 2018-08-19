@@ -2,39 +2,39 @@ package MA.util;
 
 import java.util.ArrayList;
 
-public class Movetree implements Comparable<Movetree> {
+public class MoveTree implements Comparable<MoveTree> {
 	public String name;
 	public Move move;
 	public Position position;
-	public Movetree parent;
+	public MoveTree parent;
 	public int value = 0;
 	public int piece, from, to, addition = 0;
-	public ArrayList<Movetree> children;
+	public ArrayList<MoveTree> children;
 
-	public Movetree(Move pMove, Movetree parent) {
+	public MoveTree(Move pMove, MoveTree parent) {
 		move = pMove;
 		setParent(parent);
 		position = parent.position;
 	}
 
-	public Movetree(Move pMove) {
+	public MoveTree(Move pMove) {
 		move = pMove;
 	}
 
-	public Movetree(Movetree parent, int... args) {
+	public MoveTree(MoveTree parent, int... args) {
 		this(args);
 		this.parent = parent;
 		if (parent != null && parent.position != null)
 			position = parent.position;
 	}
 
-	public Movetree(int value, Movetree parent, int... args) {
+	public MoveTree(int value, MoveTree parent, int... args) {
 		this(parent, args);
 		this.value = value;
 
 	}
 
-	public Movetree(int... args) {
+	public MoveTree(int... args) {
 		piece = args[0];
 		from = args[1];
 		to = args[2];
@@ -43,22 +43,22 @@ public class Movetree implements Comparable<Movetree> {
 		move = new Move(piece, from, to, addition);
 	}
 
-	public void setParent(Movetree parent) {
+	public void setParent(MoveTree parent) {
 		this.parent = parent;
 		parent.addChild(this);
 	}
 
-	public Movetree getParent() {
+	public MoveTree getParent() {
 		return this.parent;
 	}
 
-	public void addChild(Movetree Kind) {
+	public void addChild(MoveTree Kind) {
 		if (children == null)
-			children = new ArrayList<Movetree>();
+			children = new ArrayList<MoveTree>();
 		children.add(Kind);
 	}
 
-	public void setChildren(ArrayList<Movetree> list) {
+	public void setChildren(ArrayList<MoveTree> list) {
 		children = list;
 	}
 
@@ -69,7 +69,7 @@ public class Movetree implements Comparable<Movetree> {
 	}
 
 	@Override
-	public int compareTo(Movetree o) {
+	public int compareTo(MoveTree o) {
 		if (value > o.value)
 			return 1;
 		else if (value == o.value)

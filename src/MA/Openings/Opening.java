@@ -1,6 +1,6 @@
 package MA.Openings;
 
-import MA.util.Movetree;
+import MA.util.MoveTree;
 
 /**
  * 
@@ -8,5 +8,5 @@ import MA.util.Movetree;
  *
  */
 public abstract class Opening {
-	public Movetree helpTree, Start, Branch;
+	public MoveTree helpTree, Start, Branch;
 }

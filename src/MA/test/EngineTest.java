@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import MA.Chemon.Engine;
-import MA.util.Movetree;
+import MA.util.MoveTree;
 import MA.util.Position;
 
 class EngineTest {
@@ -27,10 +27,12 @@ class EngineTest {
 				-1, -1, -1, -1, -1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
 
 		Position position = new Position(board);
+		position.setBlackKing(95);
+		position.setWhiteKing(25);
 		Engine engine = initializeEngine(board);
-		boolean isChecked = engine.controlCheckW(position);
+		boolean isChecked = engine.whiteIsChecked(position);
 		assertTrue(isChecked);
-		isChecked = engine.controlCheckB(position);
+		isChecked = engine.blackIsChecked(position);
 		assertFalse(isChecked);
 	}
 	
@@ -39,7 +41,7 @@ class EngineTest {
 		int[] board = new int[120];
 		board[55] = 12;
 		Engine engine = initializeEngine(board);
-		List<Movetree> moves = engine.movesWhite(new Position(board), null);
+		List<MoveTree> moves = engine.movesWhite(new Position(board), null);
 		assertEquals(8, moves.size());
 	}
 
@@ -49,7 +51,7 @@ class EngineTest {
 		int[] board = new int[120];
 		board[55] = 15;
 		Engine engine = initializeEngine(board);
-		List<Movetree> moves = engine.movesWhite(new Position(board), null);
+		List<MoveTree> moves = engine.movesWhite(new Position(board), null);
 		assertEquals(8, moves.size());
 	}
 	
@@ -58,7 +60,7 @@ class EngineTest {
 		int[] board = new int[120];
 		board[25] = 10;
 		Engine engine = initializeEngine(board);
-		List<Movetree> moves = engine.movesWhite(new Position(board), null);
+		List<MoveTree> moves = engine.movesWhite(new Position(board), null);
 		assertEquals(2, moves.size());
 	}
 	
@@ -76,7 +78,7 @@ class EngineTest {
 				0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1,
 				-1, -1, -1, -1, -1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
 		Engine engine = initializeEngine(board);
-		List<Movetree> moves = engine.movesWhite(new Position(board), null);
+		List<MoveTree> moves = engine.movesWhite(new Position(board), null);
 		assertEquals(13, moves.size());
 	}
 	
@@ -95,7 +97,7 @@ class EngineTest {
 				0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1,
 				-1, -1, -1, -1, -1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
 		Engine engine = initializeEngine(board);
-		List<Movetree> moves = engine.movesWhite(new Position(board), null);
+		List<MoveTree> moves = engine.movesWhite(new Position(board), null);
 		assertEquals(14, moves.size());
 	}
 	
@@ -114,7 +116,7 @@ class EngineTest {
 				0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1,
 				-1, -1, -1, -1, -1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
 		Engine engine = initializeEngine(board);
-		List<Movetree> moves = engine.movesWhite(new Position(board), null);
+		List<MoveTree> moves = engine.movesWhite(new Position(board), null);
 		assertEquals(27, moves.size());
 	}
 	
