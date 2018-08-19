@@ -31,7 +31,7 @@ public class Controller {
 	String notation;
 	double time;
 	SearchAlgorithm searchWith = SearchAlgorithm.AlphaBeta;
-	State status = State.Human_versus_Machine;
+	State status = State.Human_versus_Human;
 
 	public Controller() {
 
@@ -101,7 +101,7 @@ public class Controller {
 
 	public void evaluateBestMove() {
 		double start = System.currentTimeMillis();
-		engine.work();// Zuggenerator informieren
+		engine.findBestMove();// Zuggenerator informieren
 		Move bestMove = engine.bestMove;// besten Zug holen
 		double end = System.currentTimeMillis();
 		view.l5.setText("Elapsed Time: " + (end - start) / 1000);
@@ -129,20 +129,18 @@ public class Controller {
 		view.mark(m.to, Color.blue);
 		
 		movecount++;
-		if (engine.legalMovesB(position, test).isEmpty() && engine.controlCheckB(position)) {
-			engine.blackIsMated = true;
+		if (engine.legalMovesB(position, test).isEmpty()) {
+			if(engine.controlCheckB(position))
+				engine.blackIsMated = true;
+			
 			running = false;
 		}
 		whitesTurn = false;
 		insertWhiteMove(m, pieceTaken);
-		if (engine.blackIsMated) {
-			running = false;
-			return;
-		}
 		if (status == State.Human_versus_Human)
 			engine.currentPosition = this.position;
 		if (status == State.Machine_versus_Machine) {
-			engine.work();
+			engine.findBestMove();
 			handleBlackMove(engine.bestMove);
 
 		}
@@ -165,8 +163,9 @@ public class Controller {
 		view.mark(m.from, Color.yellow);
 		view.mark(m.to, Color.yellow);
 		
-		if (engine.legalMovesW(position, test).isEmpty() && engine.controlCheckW(position)) {
-			engine.whiteIsMated = true;
+		if (engine.legalMovesW(position, test).isEmpty()) {
+			if(engine.controlCheckW(position))
+				engine.whiteIsMated = true;
 			running = false;
 		}
 		insertBlackMove(m, pieceTaken);
@@ -175,29 +174,29 @@ public class Controller {
 		if (status == State.Human_versus_Human)
 			engine.currentPosition = this.position;
 		if (status == State.Machine_versus_Machine) {
-			engine.work();
+			engine.findBestMove();
 			handleWhiteMove(engine.bestMove);
 
 		}
 	}
 
-	public void insertWhiteMove(Move m, boolean b) 
+	public void insertWhiteMove(Move move, boolean pieceTaken) 
 	{
-		notation = movecount + ". " + m.toString(b);
+		notation = movecount + ". " + move.toString(pieceTaken);
 		if (engine.blackIsMated) {
 			notation += "# 1-0";
 			if (status == State.Human_versus_Machine)
 				JOptionPane.showMessageDialog(null, "Gratulation! Sie haben gewonnen.");
 			else
 				JOptionPane.showMessageDialog(null, "Schachmatt. Weiss hat gewonnen.");
-		} else if (engine.controlCheckW(engine.currentPosition))
+		} else if (engine.controlCheckB(engine.currentPosition))
 			notation += "+";
 		view.movesTextArea.append(notation);
 	}
 
-	public void insertBlackMove(Move m, boolean b) 
+	public void insertBlackMove(Move move, boolean pieceTaken) 
 	{
-		notation = " " + m.toString(b);
+		notation = " " + move.toString(pieceTaken);
 		if (engine.whiteIsMated) {
 			notation += "# 0-1";
 			if (status == State.Human_versus_Machine)
@@ -205,7 +204,7 @@ public class Controller {
 			else
 				JOptionPane.showMessageDialog(null, "Schachmatt. Schwarz hat gewonnen.");
 
-		} else if (engine.controlCheckB(engine.currentPosition))
+		} else if (engine.controlCheckW(engine.currentPosition))
 			notation += "+";
 		notation += "\n";
 		view.movesTextArea.append(notation);
@@ -293,7 +292,7 @@ public class Controller {
 		engine = new Engine(position);
 		engine.controller = this;
 		if (status == State.Machine_versus_Machine) {
-			engine.work();
+			engine.findBestMove();
 			handleWhiteMove(engine.bestMove);
 		}
 	}
@@ -383,6 +382,7 @@ public class Controller {
 			engine.currentPosition = position;
 			whitesTurn = !whitesTurn;
 		}
+		view.frame.repaint();
 	}
 
 	public void openOptions() {

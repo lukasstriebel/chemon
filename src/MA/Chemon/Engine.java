@@ -39,7 +39,7 @@ public class Engine {
 		startTree.position = currentPosition;
 	}
 
-	public void work() {
+	public void findBestMove() {
 
 		if (controller.whitesTurn) {
 
@@ -56,9 +56,9 @@ public class Engine {
 		} else {
 			if (inOpening)
 				playOpening();
-			else if (numberOfMoves < 2)
+			else if (numberOfMoves == 1)
 				checkOpening();
-			else if (numberOfMoves > 1)
+			else
 				calculateBlackMove();
 			Movetree m = new Movetree(bestMove);
 			m.position = currentPosition;
@@ -78,7 +78,7 @@ public class Engine {
 		startTree.children = legalMovesB(currentPosition, startTree);
 		if (startTree.children.isEmpty()) {
 			controller.running = false;
-			if (controlCheckW(currentPosition)) {
+			if (controlCheckB(currentPosition)) {
 				blackIsMated = true;
 				return;
 			} else {
@@ -91,28 +91,32 @@ public class Engine {
 			if (controller.searchWith == SearchAlgorithm.MinMax)
 				d = min(m, 2);
 			else if (controller.searchWith == SearchAlgorithm.AlphaBeta)
-				d = beta(m, 3, -2000, 2000);
+				d = beta(m, 1, -2000, 2000);
 			else if (controller.searchWith == SearchAlgorithm.PrincipalVariation) {
 				analyzationDepth = 3;
 				d = PrincipalVariation(m, 2, -2000, 2000);
 			}
 			m.value = d;
 		}
-		Collections.sort(startTree.children);
-		Collections.reverse(startTree.children);
-		int value1 = startTree.children.get(0).value, value2;
-		double difference;
+		if (startTree.children.size() == 1)
+			bestMove = startTree.children.get(0).move;
+		else {
+			Collections.sort(startTree.children);
+			Collections.reverse(startTree.children);
+			int value1 = startTree.children.get(0).value, value2;
+			double difference;
 
-		for (int i = 1; i < startTree.children.size(); i++) {
-			value2 = startTree.children.get(i).value;
-			difference = value1 - value2;
-			if (difference > 2) {
-				bestMove = startTree.children.get(randomnumber(0, i - 1)).move;
-				break;
-			}
-			if (i == startTree.children.size() - 1) {
-				bestMove = startTree.children.get(randomnumber(0, i)).move;
-				break;
+			for (int i = 1; i < startTree.children.size(); i++) {
+				value2 = startTree.children.get(i).value;
+				difference = value1 - value2;
+				if (difference > 2) {
+					bestMove = startTree.children.get(randomnumber(0, i - 1)).move;
+					break;
+				}
+				if (i == startTree.children.size() - 1) {
+					bestMove = startTree.children.get(randomnumber(0, i)).move;
+					break;
+				}
 			}
 		}
 
@@ -331,7 +335,7 @@ public class Engine {
 	}
 
 	private void checkOpening() {
-		double Zufall = Math.random();
+		double random = Math.random();
 		if (numberOfMoves == 1) {
 			if (lastMove.piece == 10) {
 				if (lastMove.from == 33 && lastMove.to == 53) {
@@ -340,14 +344,14 @@ public class Engine {
 					playOpening();
 				} else if (lastMove.from == 35 && lastMove.to == 55) {
 					inOpening = true;
-					if (Zufall < 0.5)
-						 opening = new Sicilian();
+					if (random < 0.5)
+						opening = new Sicilian();
 					else
 						opening = new Spanish();
 					playOpening();
 				} else if (lastMove.from == 34 && lastMove.to == 54) {
 					inOpening = true;
-					if (Zufall < 0.5)
+					if (random < 0.5)
 						opening = new Slav();
 					else
 						opening = new Kings_Indian();
@@ -661,7 +665,7 @@ public class Engine {
 				list.addAll(kingmovesB(position, i, movetreee));
 				break;
 			}
-		} 
+		}
 		return list;
 	}
 
