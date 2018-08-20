@@ -27,7 +27,7 @@ public class Controller {
 	Stack<Position> oldPositions;
 	Position position = new Position(new int[120]);
 	int start, selectedPiece,  movecount;
-	boolean pieceHeld, running = true, isWhite, humanvsmachine = true, whitesTurn;
+	boolean pieceHeld, running = true, isWhite, humanvsmachine = true, whitesTurn, draw;
 	String notation;
 	double time;
 	SearchAlgorithm searchWith = SearchAlgorithm.AlphaBeta;
@@ -38,6 +38,7 @@ public class Controller {
 		initializeBoard();
 		engine = new Engine(position);
 		engine.controller = this;
+		engine.numberOfMoves = 10;
 		view = new Interface();
 		view.controller = this;
 		newGame();
@@ -83,7 +84,7 @@ public class Controller {
 			if (status == State.Human_versus_Machine) {
 				if (engine.isLegalWhite(move) && running) {
 					handleMove(move);
-					if (!engine.blackIsMated)
+					if (running)
 						evaluateBestMove();
 				} else 
 					JOptionPane.showMessageDialog(null, "This is not a legal move!");
@@ -125,29 +126,37 @@ public class Controller {
 		view.mark(move.from, Color.blue);
 		view.mark(move.to, Color.blue);
 		
-		if (whitesTurn) {
+		if (whitesTurn) {			
 			if (engine.legalMovesB(position, test).isEmpty()) {
 				if (engine.blackIsChecked(position))
 					engine.blackIsMated = true;
-
-				running = false;
+				else {
+					JOptionPane.showMessageDialog(null, "Stalemate!");
+					draw = true;
+				}
+				running = false;				
 			}
-			engine.handleWhiteMove(move);
 			movecount++;
-			insertWhiteMove(move, pieceTaken);			
+			insertWhiteMove(move, pieceTaken);
+			engine.handleWhiteMove(move);					
 		} else {
 			if (engine.legalMovesW(position, test).isEmpty()) {
 				if (engine.whiteIsChecked(position))
 					engine.whiteIsMated = true;
+				else {
+					JOptionPane.showMessageDialog(null, "Stalemate!");
+				}
 				running = false;
+				draw = true;
 			}
 			insertBlackMove(move, pieceTaken);
 		}
 		whitesTurn = !whitesTurn;
-
+		if(draw)
+			handleDraw();
 		if (status == State.Human_versus_Human)
 			engine.currentPosition = this.position;
-		if (status == State.Machine_versus_Machine) {
+		if (status == State.Machine_versus_Machine && running) {
 			engine.findBestMove();
 			handleMove(engine.bestMove);
 
@@ -199,7 +208,7 @@ public class Controller {
 		position.grrow = true;
 		position.klros = true;
 		position.klrow = true;
-		position.setBlackKing(95);
+		position.setBlackKing(98);
 		position.setWhiteKing(25);
 		oldPositions = new Stack<Position>();
 		oldPositions.push(position.clone());
@@ -263,6 +272,7 @@ public class Controller {
 		notation = "";
 		whitesTurn = true;
 		engine = new Engine(position);
+		draw = false;
 		engine.controller = this;
 		if (status == State.Machine_versus_Machine) {
 			engine.findBestMove();
@@ -354,6 +364,7 @@ public class Controller {
 			position = oldPositions.pop();
 			engine.currentPosition = position;
 			whitesTurn = !whitesTurn;
+			running = true;
 		}
 		view.frame.repaint();
 	}

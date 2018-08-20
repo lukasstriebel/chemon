@@ -20,7 +20,7 @@ public class Engine {
 
 	Move lastMove, bestMove;
 	boolean inOpening, blackIsMated, whiteIsMated;
-	int numberOfMoves = 0, analyzationDepth;
+	int numberOfMoves, analyzationDepth;
 	MoveTree startTree, testTree = new MoveTree(0, 0, 0);
 	Position currentPosition;
 	Opening opening;
@@ -33,6 +33,7 @@ public class Engine {
 
 	public Engine(Position position) {
 		lastMove = new Move(10, 0, 0);
+		numberOfMoves = 0;
 		currentPosition = position.clone();
 		currentPosition.lastMove = lastMove;
 		startTree = new MoveTree(lastMove);
@@ -70,20 +71,14 @@ public class Engine {
 		startTree.children = legalMovesB(currentPosition, startTree);
 		if (startTree.children.isEmpty()) {
 			controller.running = false;
-			if (blackIsChecked(currentPosition)) {
-				blackIsMated = true;
-				return;
-			} else {
-				controller.handleDraw();//
-				JOptionPane.showMessageDialog(null, "Stalemate!");
-			}
+			return;
 		}
 		for (MoveTree moveTree : startTree.children) {
 			moveTree.position = executeMove(moveTree);
 			if (controller.searchWith == SearchAlgorithm.MinMax)
 				bestMoveValue = min(moveTree, 2);
 			else if (controller.searchWith == SearchAlgorithm.AlphaBeta)
-				bestMoveValue = beta(moveTree, 1, -2000, 2000);
+				bestMoveValue = beta(moveTree, 3, -2000, 2000);
 			else if (controller.searchWith == SearchAlgorithm.PrincipalVariation) {
 				analyzationDepth = 3;
 				bestMoveValue = PrincipalVariation(moveTree, 2, -2000, 2000);
@@ -521,13 +516,16 @@ public class Engine {
 		startTree.position = currentPosition;
 	}
 
-	public int evaluateMovetree(MoveTree movetree) {
-		if (legalMovesW(movetree.position, movetree).size() == 0)
+	public int evaluateMovetree(MoveTree moveTree) {
+		if (legalMovesW(moveTree.position, moveTree).size() == 0)
 			return 10000000;
-		int Insgesamt = evaluatePosition(movetree.position) + evaluateMaterial(movetree.position.board);
-		Insgesamt += movesBlack(movetree.position, movetree).size();
+		//if (legalMovesB(moveTree.position, moveTree).size() == 0)
+			//return -10000000;
+		int result = 0;
+		result += evaluatePosition(moveTree.position) + evaluateMaterial(moveTree.position.board);
+		result += movesBlack(moveTree.position, moveTree).size();
 		analyzedPositions++;
-		return Insgesamt;
+		return result;
 	}
 
 	public int evaluatePosition(Position position) {
@@ -540,13 +538,7 @@ public class Engine {
 			Position += 5;
 		if (!currentPosition.grrow)
 			Position += 4;
-		int posKW = 0, posKB = 0;
-		for (int i = 21; i < 99; i++) {
-			if (position.board[i] == 25)
-				posKB = i;
-			else if (position.board[i] == 15)
-				posKW = i;
-		}
+		int posKW = position.getWhiteKing(), posKB = position.getBlackKing();
 		if (posKB % 10 == 3 || posKB % 10 == 6)
 			Position += 3;
 		else if (posKB % 10 == 2 || posKB % 10 == 7)
