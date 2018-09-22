@@ -868,6 +868,7 @@ public class Engine {
 
 	private ArrayList<MoveTree> knightmovesW(int[] board, int from, MoveTree parent) {
 		ArrayList<MoveTree> list = new ArrayList<MoveTree>();
+		
 		int to = from - 21;
 		if (board[to] == 0 || board[to] > 18)
 			list.add(new MoveTree(parent, 12, from, to));

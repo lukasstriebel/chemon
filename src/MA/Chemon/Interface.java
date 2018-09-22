@@ -8,7 +8,6 @@ import javax.imageio.ImageIO;
 import javax.sound.sampled.*;
 import javax.swing.*;
 
-import MA.util.Move;
 import MA.util.State;
 
 public class Interface {
@@ -36,6 +35,11 @@ public class Interface {
 	MyJPanel panel = new MyJPanel();
 
 	class MyJPanel extends JPanel implements ActionListener {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7710107088317624786L;
+
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == newGameItem)
 				controller.newGame();

@@ -18,8 +18,6 @@ import MA.util.Position;
 import MA.util.SearchAlgorithm;
 import MA.util.State;
 
-import java.util.*;
-
 public class Controller {
 
 	Engine engine; // Model
@@ -289,23 +287,24 @@ public class Controller {
 		fc.setFileFilter(filter);
 		int returnVal = fc.showOpenDialog(view.frame);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			file = fc.getSelectedFile();
+			file = fc.getSelectedFile();			
 			try {
 				FileReader fr = new FileReader(file);
 				char c = (char) fr.read();
-				StringBuffer s = new StringBuffer();
+				StringBuffer stringBuffer = new StringBuffer();
 				for (int i = 0; i < file.length(); i++) {
-					s.append(c);
+					stringBuffer.append(c);
 					c = (char) fr.read();
-					if (s.length() > 200)
+					if (stringBuffer.length() > 200)
 						break;
 				}
-				int i = s.lastIndexOf("]");
-				String string = s.substring(i + 2);
+				int i = stringBuffer.lastIndexOf("]");
+				String string = stringBuffer.substring(i + 2);
 				view.movesTextArea.setText(string);
+				fr.close();
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
+			} 
 		}
 	}
 
