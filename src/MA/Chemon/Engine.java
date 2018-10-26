@@ -1,7 +1,6 @@
 package MA.Chemon;
 
 import java.util.*;
-
 import javax.swing.JOptionPane;
 
 import MA.Openings.English;
@@ -66,7 +65,7 @@ public class Engine {
 	}
 
 	private void calculateBlackMove() {
-		
+
 		int bestMoveValue = 0;
 		startTree.children = legalMovesB(currentPosition, startTree);
 		if (startTree.children.isEmpty()) {
@@ -99,8 +98,8 @@ public class Engine {
 					bestMove = startTree.children.get(randomNumber(0, i - 1)).move;
 					break;
 				}
-				if (i == startTree.children.size() - 1) 
-					bestMove = startTree.children.get(randomNumber(0, i)).move;				
+				if (i == startTree.children.size() - 1)
+					bestMove = startTree.children.get(randomNumber(0, i)).move;
 			}
 		}
 
@@ -200,11 +199,11 @@ public class Engine {
 			}
 			m.children.clear();
 			return alpha;
-		} else { // keine Züge möglich
+		} else { // keine Zï¿½ge mï¿½glich
 			if (pDepth % 2 == analyzationDepth % 2 && blackIsChecked(m.position))
-				return 1000; // Weiss am Züge und weisser König im Schach(=Matt)
+				return 1000; // Weiss am Zï¿½ge und weisser Kï¿½nig im Schach(=Matt)
 			else if ((pDepth + 1) % 2 == analyzationDepth % 2 && whiteIsChecked(m.position))
-				return -1000;// Schwarz am Züge und schwarzer König im Schach(=Matt)
+				return -1000;// Schwarz am Zï¿½ge und schwarzer Kï¿½nig im Schach(=Matt)
 			else // Patt
 				return 0;
 		}
@@ -231,31 +230,29 @@ public class Engine {
 			return -100000;
 		else
 			return 0;
-
 	}
 
-	private int beta(MoveTree m, int pDepth, int alpha, int beta) {
+	private int beta(MoveTree moveTree, int pDepth, int alpha, int beta) {
 		if (pDepth == 0)
-			return evaluateMovetree(m);
-		m.children = legalMovesW(m.position, m);
-		if (!m.children.isEmpty()) {
-			for (MoveTree child : m.children) {
+			return evaluateMovetree(moveTree);
+		moveTree.children = legalMovesW(moveTree.position, moveTree);
+		if (!moveTree.children.isEmpty()) {
+			for (MoveTree child : moveTree.children) {
 				child.position = executeMove(child);
 				int value = alpha(child, pDepth - 1, alpha, beta);
 				if (value <= alpha) {
-					m.children.clear();
+					moveTree.children.clear();
 					return alpha;
 				}
 				if (value < beta)
 					beta = value;
 			}
-			m.children.clear();
+			moveTree.children.clear();
 			return beta;
-		} else if (whiteIsChecked(m.position))
+		} else if (whiteIsChecked(moveTree.position))
 			return 100000000;
 		else
 			return 0;
-
 	}
 
 	private int max(MoveTree m, int pDepth) {
@@ -271,7 +268,6 @@ public class Engine {
 		}
 		m.children.clear();
 		return worst;
-
 	}
 
 	private int min(MoveTree m, int pDepth) {
@@ -287,7 +283,6 @@ public class Engine {
 		}
 		m.children.clear();
 		return worst;
-
 	}
 
 	private void playOpening() {
@@ -315,7 +310,6 @@ public class Engine {
 			else
 				calculateWhiteMove();
 		}
-
 	}
 
 	private void checkOpening() {
@@ -381,31 +375,21 @@ public class Engine {
 			board[move.to + 1] = 0;
 			position.klrow = false;
 			position.grrow = false;
-		}
-
-		else if (move.addition == 4) { // gr Rochade
+		}	else if (move.addition == 4) { // gr Rochade
 			board[move.to + 1] = move.piece - 4;
 			board[move.to - 2] = 0;
 			position.klrow = false;
 			position.grrow = false;
-		}
-
-		else if (move.addition == -1) {// en passant
+		}	else if (move.addition == -1) {// en passant
 			board[move.to + 10] = 0;
-		}
-
-		else if (move.addition == -2) { // Umwandlung
+		}	else if (move.addition == -2) { // Umwandlung
 			board[move.to] = 24;
-		}
-
-		else if (move.addition == -3) { // kl Rochade
+		}	else if (move.addition == -3) { // kl Rochade
 			board[move.to - 1] = move.piece - 4;
 			board[move.to + 1] = 0;
 			position.klros = false;
 			position.grros = false;
-		}
-
-		else if (move.addition == -4) { // gr Rochade
+		}	else if (move.addition == -4) { // gr Rochade
 			board[move.to + 1] = move.piece - 4;
 			board[move.to - 2] = 0;
 			position.klros = false;
@@ -416,8 +400,32 @@ public class Engine {
 		return position;
 	}
 
-	public boolean isLegalWhite(Move move) {
+	public boolean isLegalMove(Move move, boolean whitesMove) {
+		ArrayList<MoveTree> possibleMoves = whitesMove ? movesWhite(currentPosition, new MoveTree(move)) : movesBlack(currentPosition, new MoveTree(move));
+		boolean result = false;
+		MoveTree movetree = null;
+		for (MoveTree tree : possibleMoves) {
+			if (tree.move.equals(move)) {
+				move.addition = tree.move.addition;
+				result = true;
+				movetree = tree;
+				break;
+			}
+		}
 
+		if (result) {
+			movetree.position = currentPosition.clone();
+			Position pos = executeMove(movetree);
+			int king = whitesMove ? pos.getWhiteKing() : pos.getBlackKing();
+			possibleMoves = whitesMove ? movesBlack(pos, movetree) : movesWhite(pos, movetree);
+			for (MoveTree possibleMove : possibleMoves)
+				if (possibleMove.to == king)
+					return false;
+		}
+		return result;
+	}
+
+	public boolean isLegalWhite(Move move) {
 		ArrayList<MoveTree> possibleMoves = movesWhite(currentPosition, new MoveTree(move));
 		boolean result = false;
 		MoveTree movetree = null;
@@ -445,7 +453,6 @@ public class Engine {
 
 	public boolean isLegalBlack(Move move) {
 		ArrayList<MoveTree> possibleMoves = movesBlack(currentPosition, new MoveTree(move));
-
 		boolean result = false;
 		MoveTree movetree = null;
 		for (MoveTree possibleMove : possibleMoves) {
@@ -860,7 +867,7 @@ public class Engine {
 
 	private ArrayList<MoveTree> knightmovesW(int[] board, int from, MoveTree parent) {
 		ArrayList<MoveTree> list = new ArrayList<MoveTree>();
-		
+
 		int to = from - 21;
 		if (board[to] == 0 || board[to] > 18)
 			list.add(new MoveTree(parent, 12, from, to));

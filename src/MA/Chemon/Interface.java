@@ -36,14 +36,14 @@ public class Interface {
 
 	class MyJPanel extends JPanel implements ActionListener {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -7710107088317624786L;
 
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == newGameItem)
+			if (e.getSource() == newGameItem) {
 				controller.newGame();
-			else if (e.getSource() == moveBackItem)
+			} else if (e.getSource() == moveBackItem)
 				controller.moveBack();
 			else if (e.getSource() == saveGameItem)
 				controller.saveGame();
@@ -60,7 +60,7 @@ public class Interface {
 		}
 
 		public void paintComponent(Graphics graphics) {
-			super.paintComponent(graphics); 
+			super.paintComponent(graphics);
 			l1.repaint();
 			l2.repaint();
 			l3.repaint();
@@ -87,7 +87,7 @@ public class Interface {
 				controller.handleMousePressed(mouseClickToField(e.getLocationOnScreen().x, e.getLocationOnScreen().y));
 			}
 		});
-		l1 = new JLabel("© 2010 - 2018 Lukas Striebel");
+		l1 = new JLabel("ï¿½ 2010 - 2018 Lukas Striebel");
 		l2 = new JLabel("");
 		l3 = new JLabel("Partieverlauf");
 		l4 = new JLabel("Stellungsbewertung");
@@ -125,19 +125,20 @@ public class Interface {
 		frame.getContentPane().add(l6, BorderLayout.CENTER);
 		frame.getContentPane().add(l7, BorderLayout.CENTER);
 		frame.getContentPane().add(panel);
-		
+
 		try {
 			path = new File("").getCanonicalPath();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		for (int i = 0; i < 26; i++)
+		for (int i = 0; i < 26; i++) {
 			try {
 				String file = path + "\\resources\\" + gifPath[i] + ".gif";
 				pictures[i] = ImageIO.read(new File(file));
 			} catch (Exception e) {
-				System.err.println(e.getMessage());
+				e.printStackTrace();
 			}
+		}
 		frame.setVisible(true);
 		panel.setLocation(0, 0);
 	}
@@ -165,28 +166,30 @@ public class Interface {
 		return VERTICAL_OFFSET + (9 - row) * SQUARE_LENGTH;
 	}
 
-	public void drawBoard(Graphics graphics) {	
+	public void drawBoard(Graphics graphics) {
 		graphics.setColor(new Color(128, 64, 0));
 		graphics.fillRect(HORIZONTAL_OFFSET-20, VERTICAL_OFFSET-20, 40 + 8 * SQUARE_LENGTH, 40 + 8 * SQUARE_LENGTH);
 		for (int i = 21; i < 99; i++) {
 			int piece = controller.position.board[i];
-			if(piece == 0)
+			if(piece == 0) {}
 				drawSquare(i, graphics);
-			else if(piece > 0)
+			} else if(piece > 0) {
 				drawPiece(controller.position.board[i], i, graphics);
+			}
 		}
 	}
 
 	private void drawSquare(int square, Graphics graphics) {
 		int x = fieldToHorizontalPosition(square), y = fieldToVerticalPosition(square);
 		if (x != -1 && y != -1) {
-			if (boardColors[square - 21])
+			if (boardColors[square - 21]) {
 				graphics.drawImage(pictures[1], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-			else
+			} else {
 				graphics.drawImage(pictures[0], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
+			}
 		}
 	}
-	
+
 	private void drawPiece(int piece, int field, Graphics graphics) {
 		int x = fieldToHorizontalPosition(field), y = fieldToVerticalPosition(field);
 		if(piece >= 20)
@@ -216,11 +219,11 @@ public class Interface {
 		viewMenu = new JMenu("Ansicht");
 		offerDrawItem = new JMenuItem("Remis anbieten");
 		resignItem = new JMenuItem("Aufgeben");
-		moveBackItem = new JMenuItem("Zug zurück");
+		moveBackItem = new JMenuItem("Zug zurï¿½ck");
 		exitItem = new JMenuItem("Beenden");
 		newGameItem = new JMenuItem("Neue Partie");
 		saveGameItem = new JMenuItem("Partie speichern");
-		openGameItem = new JMenuItem("Partie öffnen");
+		openGameItem = new JMenuItem("Partie ï¿½ffnen");
 		refreshItem = new JMenuItem("Aktualisieren");
 		optionsItem = new JMenuItem("Einstellungen");
 		int km = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -315,7 +318,7 @@ public class Interface {
 		});
 	}
 
-	public void movesound() { // spielt einen Ton ab um den Spieler über einen Move zu informieren
+	public void movesound() { // spielt einen Ton ab um den Spieler ï¿½ber einen Move zu informieren
 		try {
 			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(path + "\\resources\\MOVE.wav"));
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(audioInputStream);
