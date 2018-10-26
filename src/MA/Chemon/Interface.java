@@ -43,11 +43,11 @@ public class Interface {
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == newGameItem) {
 				controller.newGame();
-			} else if (e.getSource() == moveBackItem)
+			} else if (e.getSource() == moveBackItem) {
 				controller.moveBack();
-			else if (e.getSource() == saveGameItem)
+			} else if (e.getSource() == saveGameItem) {
 				controller.saveGame();
-			else if (e.getSource() == openGameItem)
+			} else if (e.getSource() == openGameItem)
 				controller.openGame();
 			else if (e.getSource() == resignItem)
 				controller.resign();
@@ -319,9 +319,8 @@ public class Interface {
 	}
 
 	public void movesound() { // spielt einen Ton ab um den Spieler �ber einen Move zu informieren
-		try {
-			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(path + "\\resources\\MOVE.wav"));
-			BufferedInputStream bufferedInputStream = new BufferedInputStream(audioInputStream);
+		try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(path + "\\resources\\MOVE.wav"));
+			BufferedInputStream bufferedInputStream = new BufferedInputStream(audioInputStream)){	
 			AudioFormat af = audioInputStream.getFormat();
 			int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength());
 			byte[] audio = new byte[size];
