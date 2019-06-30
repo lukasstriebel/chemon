@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: MA.Chemon.Controller
+Main-Class: chemon.mvc.Controller

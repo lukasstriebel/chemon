@@ -1,4 +1,4 @@
-package MA.util;
+package chemon.util;
 
 import java.util.ArrayList;
 
@@ -24,8 +24,9 @@ public class MoveTree implements Comparable<MoveTree> {
 	public MoveTree(MoveTree parent, int... args) {
 		this(args);
 		this.parent = parent;
-		if (parent != null && parent.position != null)
+		if (parent != null && parent.position != null) {
 			position = parent.position;
+		}
 	}
 
 	public MoveTree(int value, MoveTree parent, int... args) {
@@ -38,8 +39,9 @@ public class MoveTree implements Comparable<MoveTree> {
 		piece = args[0];
 		from = args[1];
 		to = args[2];
-		if (args.length > 3)
+		if (args.length > 3) {
 			addition = args[3];
+		}
 		move = new Move(piece, from, to, addition);
 	}
 
@@ -53,8 +55,9 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	public void addChild(MoveTree Kind) {
-		if (children == null)
+		if (children == null) {
 			children = new ArrayList<MoveTree>();
+		}
 		children.add(Kind);
 	}
 
@@ -62,20 +65,22 @@ public class MoveTree implements Comparable<MoveTree> {
 		children = list;
 	}
 
+	@Override
 	public String toString() {
-		if (move == null)
+		if (move == null) {
 			move = new Move(piece, from, to, addition);
+		}
 		return move.toString(false);
 	}
 
-	@Override
 	public int compareTo(MoveTree o) {
-		if (value > o.value)
+		if (value > o.value) {
 			return 1;
-		else if (value == o.value)
+		} else if (value == o.value) {
 			return 0;
-		else
+		} else {
 			return -1;
+		}
 	}
 
 }

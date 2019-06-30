@@ -1,4 +1,4 @@
-package MA.test;
+package chemon.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import MA.Chemon.Model;
-import MA.util.MoveTree;
-import MA.util.Position;
+import chemon.mvc.Model;
+import chemon.util.MoveTree;
+import chemon.util.Position;
 
-class EngineTest {
+class ModelTest {
 
 	@Test
 	void testCheck() {

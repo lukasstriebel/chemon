@@ -1,4 +1,4 @@
-package MA.util;
+package chemon.util;
 
 /**
  * Das Enum State definiert den Spielmodus

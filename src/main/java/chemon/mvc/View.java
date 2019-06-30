@@ -1,4 +1,4 @@
-package MA.Chemon;
+package chemon.mvc;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,7 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
-import MA.util.State;
+import chemon.util.State;
 
 public class View {
 
@@ -112,7 +112,7 @@ public class View {
 				controller.handleMousePressed(mouseClickToField(e.getLocationOnScreen().x, e.getLocationOnScreen().y));
 			}
 		});
-		l1 = new JLabel("ï¿½ 2010 - 2018 Lukas Striebel");
+		l1 = new JLabel("2010 - 2019 Lukas Striebel");
 		l2 = new JLabel("");
 		l3 = new JLabel("Partieverlauf");
 		l4 = new JLabel("Stellungsbewertung");
@@ -153,6 +153,7 @@ public class View {
 
 		try {
 			path = new File("").getCanonicalPath();
+			System.out.println(path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -179,7 +180,7 @@ public class View {
 
 	public int fieldToHorizontalPosition(int field) {
 		int column = field % 10;
-		if(column > 8 || column < 1) {
+		if (column > 8 || column < 1) {
 			return -1;
 		}
 		return HORIZONTAL_OFFSET +  (column - 1) * SQUARE_LENGTH;
@@ -188,7 +189,7 @@ public class View {
 
 	public int fieldToVerticalPosition(int field) {
 		int row = field / 10;
-		if(row > 10 || row < 2) {
+		if (row > 10 || row < 2) {
 			return -1;
 		}
 		return VERTICAL_OFFSET + (9 - row) * SQUARE_LENGTH;
@@ -201,7 +202,7 @@ public class View {
 			int piece = controller.position.board[i];
 			if (piece == 0) {
 				drawSquare(i, graphics);
-			} else if(piece > 0) {
+			} else if (piece > 0) {
 				drawPiece(controller.position.board[i], i, graphics);
 			}
 		}
@@ -220,7 +221,7 @@ public class View {
 
 	private void drawPiece(int piece, int field, Graphics graphics) {
 		int x = fieldToHorizontalPosition(field), y = fieldToVerticalPosition(field);
-		if(piece >= 20) {
+		if (piece >= 20) {
 			piece -= 4;
 		}
 		int blackSquare = boardColors[field - 21] ? 1 : 0;
@@ -248,11 +249,11 @@ public class View {
 		viewMenu = new JMenu("Ansicht");
 		offerDrawItem = new JMenuItem("Remis anbieten");
 		resignItem = new JMenuItem("Aufgeben");
-		moveBackItem = new JMenuItem("Zug zurï¿½ck");
+		moveBackItem = new JMenuItem("Zug zurück");
 		exitItem = new JMenuItem("Beenden");
 		newGameItem = new JMenuItem("Neue Partie");
 		saveGameItem = new JMenuItem("Partie speichern");
-		openGameItem = new JMenuItem("Partie ï¿½ffnen");
+		openGameItem = new JMenuItem("Partie öffnen");
 		refreshItem = new JMenuItem("Aktualisieren");
 		optionsItem = new JMenuItem("Einstellungen");
 		int km = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();

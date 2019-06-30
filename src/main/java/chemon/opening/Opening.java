@@ -1,6 +1,6 @@
-package MA.Openings;
+package chemon.opening;
 
-import MA.util.MoveTree;
+import chemon.util.MoveTree;
 
 /**
  * 

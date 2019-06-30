@@ -1,4 +1,4 @@
-package MA.util;
+package chemon.util;
 
 public class Move {
 	// Bezugsobjekte

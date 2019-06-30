@@ -1,4 +1,4 @@
-package MA.Chemon;
+package chemon.mvc;
 
 import java.awt.Color;
 import java.io.File;
@@ -12,11 +12,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
-import MA.util.Move;
-import MA.util.MoveTree;
-import MA.util.Position;
-import MA.util.SearchAlgorithm;
-import MA.util.State;
+import chemon.util.Move;
+import chemon.util.MoveTree;
+import chemon.util.Position;
+import chemon.util.SearchAlgorithm;
+import chemon.util.State;
 
 public class Controller {
 
@@ -44,14 +44,14 @@ public class Controller {
 
 	public static void main(String[] args) {
 		Controller con = new Controller();
-		// con.openOptions();
+		con.openOptions();
 	}
 
 	public void handleMousePressed(int where) {
 		if (!(status == State.Machine_versus_Machine) && running) {
-			if (pieceHeld)
+			if (pieceHeld) {
 				checkMove(where);
-			else {
+			} else {
 				selectedPiece = position.board[where];
 				if (status == State.Human_versus_Machine) {
 					if (selectedPiece > 5 && selectedPiece < 18) {
@@ -82,8 +82,9 @@ public class Controller {
 			if (status == State.Human_versus_Machine) {
 				if (engine.isLegalWhite(move) && running) {
 					handleMove(move);
-					if (running)
+					if (running) {
 						evaluateBestMove();
+					}
 				} else
 					JOptionPane.showMessageDialog(null, "This is not a legal move!");
 			} else if (status == State.Human_versus_Human)
@@ -125,9 +126,9 @@ public class Controller {
 
 		if (whitesTurn) {
 			if (engine.legalMovesB(position, test).isEmpty()) {
-				if (engine.blackIsChecked(position))
+				if (engine.blackIsChecked(position)) {
 					engine.blackIsMated = true;
-				else {
+				} else {
 					JOptionPane.showMessageDialog(null, "Stalemate!");
 					draw = true;
 				}

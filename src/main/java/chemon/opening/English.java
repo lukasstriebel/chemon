@@ -1,7 +1,7 @@
-package MA.Openings;
+package chemon.opening;
 
-import MA.util.Move;
-import MA.util.MoveTree;
+import chemon.util.Move;
+import chemon.util.MoveTree;
 
 /**
  * Die Zugfolge für die Englische Eröffnung

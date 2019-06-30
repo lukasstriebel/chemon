@@ -1,6 +1,6 @@
-package MA.Openings;
+package chemon.opening;
 
-import MA.util.*;
+import chemon.util.*;
 
 public class Sicilian extends Opening{
 	

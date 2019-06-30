@@ -1,19 +1,21 @@
-package MA.Chemon;
+package chemon.mvc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import javax.swing.JOptionPane;
 
-import MA.Openings.English;
-import MA.Openings.Kings_Indian;
-import MA.Openings.Opening;
-import MA.Openings.Sicilian;
-import MA.Openings.Slav;
-import MA.Openings.Spanish;
-import MA.util.Move;
-import MA.util.MoveTree;
-import MA.util.Position;
-import MA.util.SearchAlgorithm;
-import MA.util.State;
+import chemon.opening.English;
+import chemon.opening.KingsIndian;
+import chemon.opening.Opening;
+import chemon.opening.Sicilian;
+import chemon.opening.Slav;
+import chemon.opening.Spanish;
+import chemon.util.Move;
+import chemon.util.MoveTree;
+import chemon.util.Position;
+import chemon.util.SearchAlgorithm;
+import chemon.util.State;
 
 public class Model {
 
@@ -49,12 +51,13 @@ public class Model {
 			startTree.position = currentPosition;
 			lastMove = bestMove;
 		} else {
-			if (inOpening)
+			if (inOpening) {
 				playOpening();
-			else if (numberOfMoves < 2)
+			} else if (numberOfMoves < 2) {
 				checkOpening();
-			else
+			} else {
 				calculateBlackMove();
+			}
 			MoveTree m = new MoveTree(bestMove);
 			m.position = currentPosition;
 			currentPosition = executeMove(m);
@@ -74,19 +77,19 @@ public class Model {
 		}
 		for (MoveTree moveTree : startTree.children) {
 			moveTree.position = executeMove(moveTree);
-			if (controller.searchWith == SearchAlgorithm.MinMax)
+			if (controller.searchWith == SearchAlgorithm.MinMax) {
 				bestMoveValue = min(moveTree, 2);
-			else if (controller.searchWith == SearchAlgorithm.AlphaBeta)
+			} else if (controller.searchWith == SearchAlgorithm.AlphaBeta) {
 				bestMoveValue = beta(moveTree, 3, -2000, 2000);
-			else if (controller.searchWith == SearchAlgorithm.PrincipalVariation) {
+			} else if (controller.searchWith == SearchAlgorithm.PrincipalVariation) {
 				analyzationDepth = 3;
 				bestMoveValue = PrincipalVariation(moveTree, 2, -2000, 2000);
 			}
 			moveTree.value = bestMoveValue;
 		}
-		if (startTree.children.size() == 1)
+		if (startTree.children.size() == 1) {
 			bestMove = startTree.children.get(0).move;
-		else {
+		} else {
 			Collections.sort(startTree.children, Collections.reverseOrder());
 			int bestValue = startTree.children.get(0).value, secondBestValue;
 			double difference;
@@ -98,8 +101,9 @@ public class Model {
 					bestMove = startTree.children.get(randomNumber(0, i - 1)).move;
 					break;
 				}
-				if (i == startTree.children.size() - 1)
+				if (i == startTree.children.size() - 1) {
 					bestMove = startTree.children.get(randomNumber(0, i)).move;
+				}
 			}
 		}
 
@@ -108,18 +112,19 @@ public class Model {
 	}
 
 	private void calculateWhiteMove() {
-		if (inOpening)
+		if (inOpening) {
 			playOpening();
-		else if (numberOfMoves == 0) {
+		} else if (numberOfMoves == 0) {
 			double random = Math.random();
-			if (random < 0.4)
+			if (random < 0.4) {
 				bestMove = new Move(10, 35, 55);
-			else if (random < 0.7)
+			} else if (random < 0.7) {
 				bestMove = new Move(10, 34, 54);
-			else if (random < 0.9)
+			} else if (random < 0.9) {
 				bestMove = new Move(10, 33, 53);
-			else
+			} else {
 				bestMove = new Move(12, 27, 46);
+			}
 		} else {
 			startTree.children = legalMovesW(currentPosition, startTree);
 			if (startTree.children.isEmpty()) {
@@ -140,7 +145,7 @@ public class Model {
 			Collections.sort(startTree.children);
 			int value1 = startTree.children.get(0).value, value2;
 			double difference;
-			if (!startTree.children.isEmpty())
+			if (!startTree.children.isEmpty()) {
 				for (int i = 1; i < startTree.children.size(); i++) {
 					value2 = startTree.children.get(i).value;
 					difference = value1 - value2;
@@ -150,7 +155,7 @@ public class Model {
 					}
 					startTree.value = startTree.children.get(0).value;
 				}
-			else {
+			} else {
 				controller.running = false;
 				controller.handleDraw();
 			}
@@ -162,21 +167,25 @@ public class Model {
 	private int PrincipalVariation(MoveTree m, int pDepth, int alpha, int beta) {
 		boolean PVfound = false;
 		int value = 0;
-		if (pDepth == 0)
+		if (pDepth == 0) {
 			return evaluateMovetree(m);
-		if (pDepth % 2 == analyzationDepth % 2)
+		}
+		if (pDepth % 2 == analyzationDepth % 2) {
 			m.children = legalMovesW(m.position, m);
-		else
+		} else {
 			m.children = legalMovesB(m.position, m);
+		}
 		if (!m.children.isEmpty()) {
 			for (MoveTree child : m.children) {
 				child.position = executeMove(child);
 				if (PVfound) {
 					value = PrincipalVariation(child, pDepth - 1, -alpha - 1, -alpha);
-					if (value > alpha && value < beta)
+					if (value > alpha && value < beta) {
 						value = PrincipalVariation(child, pDepth - 1, -beta, -alpha);
-				} else
+					}
+				} else {
 					value = PrincipalVariation(child, pDepth - 1, -beta, -alpha);
+				}
 				if (pDepth % 2 == analyzationDepth % 2) {
 					if (value <= beta) {
 						m.children.clear();
@@ -200,18 +209,20 @@ public class Model {
 			m.children.clear();
 			return alpha;
 		} else { // keine Z�ge m�glich
-			if (pDepth % 2 == analyzationDepth % 2 && blackIsChecked(m.position))
+			if (pDepth % 2 == analyzationDepth % 2 && blackIsChecked(m.position)) {
 				return 1000; // Weiss am Z�ge und weisser K�nig im Schach(=Matt)
-			else if ((pDepth + 1) % 2 == analyzationDepth % 2 && whiteIsChecked(m.position))
+			} else if ((pDepth + 1) % 2 == analyzationDepth % 2 && whiteIsChecked(m.position)) {
 				return -1000;// Schwarz am Z�ge und schwarzer K�nig im Schach(=Matt)
-			else // Patt
+			} else {
 				return 0;
+			}
 		}
 	}
 
 	private int alpha(MoveTree m, int pDepth, int alpha, int beta) {
-		if (pDepth == 0)
+		if (pDepth == 0) {
 			return evaluateMovetree(m);
+		}
 		m.children = legalMovesB(m.position, m);
 		if (!m.children.isEmpty()) {
 			for (MoveTree child : m.children) {
@@ -221,20 +232,23 @@ public class Model {
 					m.children.clear();
 					return beta;
 				}
-				if (value > alpha)
+				if (value > alpha) {
 					alpha = value;
+				}
 			}
 			m.children.clear();
 			return alpha;
-		} else if (blackIsChecked(m.position))
+		} else if (blackIsChecked(m.position)) {
 			return -100000;
-		else
+		} else {
 			return 0;
+		}
 	}
 
 	private int beta(MoveTree moveTree, int pDepth, int alpha, int beta) {
-		if (pDepth == 0)
+		if (pDepth == 0) {
 			return evaluateMovetree(moveTree);
+		}
 		moveTree.children = legalMovesW(moveTree.position, moveTree);
 		if (!moveTree.children.isEmpty()) {
 			for (MoveTree child : moveTree.children) {
@@ -244,42 +258,48 @@ public class Model {
 					moveTree.children.clear();
 					return alpha;
 				}
-				if (value < beta)
+				if (value < beta) {
 					beta = value;
+				}
 			}
 			moveTree.children.clear();
 			return beta;
-		} else if (whiteIsChecked(moveTree.position))
+		} else if (whiteIsChecked(moveTree.position)) {
 			return 100000000;
-		else
+		} else {
 			return 0;
+		}
 	}
 
 	private int max(MoveTree m, int pDepth) {
-		if (pDepth == 0)
+		if (pDepth == 0) {
 			return evaluateMovetree(m);
+		}
 		int worst = -2000;
 		m.children = legalMovesB(m.position, m);
 		for (MoveTree child : m.children) {
 			child.position = executeMove(child);
 			int value = min(child, pDepth - 1);
-			if (value > worst)
+			if (value > worst) {
 				worst = value;
+			}
 		}
 		m.children.clear();
 		return worst;
 	}
 
 	private int min(MoveTree m, int pDepth) {
-		if (pDepth == 0)
+		if (pDepth == 0) {
 			return evaluateMovetree(m);
+		}
 		int worst = 2000;
 		m.children = legalMovesW(m.position, m);
 		for (MoveTree child : m.children) {
 			child.position = executeMove(child);
 			int value = max(child, pDepth - 1);
-			if (value < worst)
+			if (value < worst) {
 				worst = value;
+			}
 		}
 		m.children.clear();
 		return worst;
@@ -288,7 +308,7 @@ public class Model {
 	private void playOpening() {
 		Move Book;
 		boolean notFound = true;
-		if (opening.helpTree.children != null)
+		if (opening.helpTree.children != null) {
 			for (MoveTree m : opening.helpTree.children) {
 				Book = m.move;
 				if (Book.piece == lastMove.piece && Book.from == lastMove.from && Book.to == lastMove.to
@@ -298,17 +318,20 @@ public class Model {
 					int random = randomNumber(0, m.children.size() - 1);
 					bestMove = m.children.get(random).move;
 					lastMove = bestMove;
-					if (controller.status != State.Machine_versus_Machine)
+					if (controller.status != State.Machine_versus_Machine) {
 						opening.helpTree = m.children.get(random);
+					}
 					controller.sleep(200);
 				}
 			}
+		}
 		if (notFound) {
 			inOpening = false;
-			if (!controller.whitesTurn)
+			if (!controller.whitesTurn) {
 				calculateBlackMove();
-			else
+			} else {
 				calculateWhiteMove();
+			}
 		}
 	}
 
@@ -322,22 +345,26 @@ public class Model {
 					playOpening();
 				} else if (lastMove.from == 35 && lastMove.to == 55) {
 					inOpening = true;
-					if (random < 0.5)
+					if (random < 0.5) {
 						opening = new Sicilian();
-					else
+					} else {
 						opening = new Spanish();
+					}
 					playOpening();
 				} else if (lastMove.from == 34 && lastMove.to == 54) {
 					inOpening = true;
-					if (random < 0.5)
+					if (random < 0.5) {
 						opening = new Slav();
-					else
-						opening = new Kings_Indian();
+					} else {
+						opening = new KingsIndian();
+					}
 					playOpening();
-				} else
+				} else {
 					calculateBlackMove();
-			} else
+				}
+			} else {
 				calculateBlackMove();
+			}
 		}
 	}
 
@@ -352,19 +379,21 @@ public class Model {
 			position.klrow = false;
 			position.grrow = false;
 			position.setWhiteKing(move.to);
-		} else if (move.piece == 11 && move.from == 21)
+		} else if (move.piece == 11 && move.from == 21) {
 			position.grrow = false;
-		else if (move.piece == 11 && move.from == 28)
+		} else if (move.piece == 11 && move.from == 28) {
 			position.klrow = false;
+		}
 
 		if (move.piece == 25) {
 			position.klros = false;
 			position.grros = false;
 			position.setBlackKing(move.to);
-		} else if (move.piece == 21 && move.from == 91)
+		} else if (move.piece == 21 && move.from == 91) {
 			position.grros = false;
-		else if (move.piece == 21 && move.from == 98)
+		} else if (move.piece == 21 && move.from == 98) {
 			position.klros = false;
+		}
 
 		if (move.addition == 1) {// en passant
 			board[move.to - 10] = 0;
@@ -418,9 +447,11 @@ public class Model {
 			Position pos = executeMove(movetree);
 			int king = whitesMove ? pos.getWhiteKing() : pos.getBlackKing();
 			possibleMoves = whitesMove ? movesBlack(pos, movetree) : movesWhite(pos, movetree);
-			for (MoveTree possibleMove : possibleMoves)
-				if (possibleMove.to == king)
+			for (MoveTree possibleMove : possibleMoves) {
+				if (possibleMove.to == king) {
 					return false;
+				}
+			}
 		}
 		return result;
 	}
@@ -443,9 +474,11 @@ public class Model {
 			Position pos = executeMove(movetree);
 			int whiteKing = pos.getWhiteKing();
 			possibleMoves = movesBlack(pos, movetree);
-			for (MoveTree possibleMove : possibleMoves)
-				if (possibleMove.to == whiteKing)
+			for (MoveTree possibleMove : possibleMoves) {
+				if (possibleMove.to == whiteKing) {
 					return false;
+				}
+			}
 		}
 
 		return result;
@@ -469,9 +502,11 @@ public class Model {
 			Position pos = executeMove(movetree);
 			int blackKing = pos.getBlackKing();
 			possibleMoves = movesWhite(pos, movetree);
-			for (MoveTree possibleMove : possibleMoves)
-				if (possibleMove.to == blackKing)
+			for (MoveTree possibleMove : possibleMoves) {
+				if (possibleMove.to == blackKing) {
 					return false;
+				}
+			}
 		}
 
 		return result;
@@ -485,12 +520,15 @@ public class Model {
 		position.lastMove = new Move(0, 0, 0);
 		for (MoveTree movetree : list) {
 			int compare = movetree.move.to;
-			if (compare == 94)
+			if (compare == 94) {
 				position.d8threat = true;
-			if (compare == 96)
+			}
+			if (compare == 96) {
 				position.f8threat = true;
-			if (compare == blackKingPosition)
+			}
+			if (compare == blackKingPosition) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -503,12 +541,15 @@ public class Model {
 		position.lastMove = new Move(0, 0, 0);
 		for (MoveTree m : list) {
 			int compare = m.move.to;
-			if (compare == 24)
+			if (compare == 24) {
 				position.d1threat = true;
-			if (compare == 26)
+			}
+			if (compare == 26) {
 				position.f1threat = true;
-			if (compare == whiteKingPosition)
+			}
+			if (compare == whiteKingPosition) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -524,10 +565,11 @@ public class Model {
 	}
 
 	public int evaluateMovetree(MoveTree moveTree) {
-		if (legalMovesW(moveTree.position, moveTree).size() == 0)
+		if (legalMovesW(moveTree.position, moveTree).size() == 0) {
 			return 10000000;
+		}
 		//if (legalMovesB(moveTree.position, moveTree).size() == 0)
-			//return -10000000;
+		//return -10000000;
 		int result = 0;
 		result += evaluatePosition(moveTree.position) + evaluateMaterial(moveTree.position.board);
 		result += movesBlack(moveTree.position, moveTree).size();
@@ -537,35 +579,42 @@ public class Model {
 
 	public int evaluatePosition(Position position) {
 		int Position = 0;
-		if (currentPosition.klros)
+		if (currentPosition.klros) {
 			Position += 5;
-		if (currentPosition.grros)
+		}
+		if (currentPosition.grros) {
 			Position += 4;
-		if (!currentPosition.klrow)
+		}
+		if (!currentPosition.klrow) {
 			Position += 5;
-		if (!currentPosition.grrow)
+		}
+		if (!currentPosition.grrow) {
 			Position += 4;
+		}
 		int posKW = position.getWhiteKing(), posKB = position.getBlackKing();
-		if (posKB % 10 == 3 || posKB % 10 == 6)
+		if (posKB % 10 == 3 || posKB % 10 == 6) {
 			Position += 3;
-		else if (posKB % 10 == 2 || posKB % 10 == 7)
+		} else if (posKB % 10 == 2 || posKB % 10 == 7) {
 			Position += 8;
-		else if (posKB % 10 == 1 || posKB % 10 == 8)
+		} else if (posKB % 10 == 1 || posKB % 10 == 8) {
 			Position += 10;
-		if (posKB % 10 == 4)
+		}
+		if (posKB % 10 == 4) {
 			Position += 10;
-		else if (posKB % 10 == 5 || posKB % 10 == 3)
+		} else if (posKB % 10 == 5 || posKB % 10 == 3) {
 			Position += 8;
+		}
 		ArrayList<MoveTree> list = movesBlack(position, testTree);
 		for (MoveTree m : list) {
 			int compare = m.move.to;
-			if (compare == posKW)
+			if (compare == posKW) {
 				Position += 15;
-			/*
-			 * else if (compare == posKW+1 ||compare == posKW-1 ||compare == posKW+10 ||
-			 * compare == posKW-10 ||compare == posKW+11 ||compare == posKW-11 || compare ==
-			 * posKW+9 ||compare == posKW-9) Position += 10;
-			 */
+				/*
+				 * else if (compare == posKW+1 ||compare == posKW-1 ||compare == posKW+10 ||
+				 * compare == posKW-10 ||compare == posKW+11 ||compare == posKW-11 || compare ==
+				 * posKW+9 ||compare == posKW-9) Position += 10;
+				 */
+			}
 		}
 		return Position;
 	}
@@ -573,30 +622,31 @@ public class Model {
 	public int evaluateMaterial(int[] board) {
 		int Material = 0;
 		for (int i = 21; i < 99; i++) {
-			if (board[i] == 10)
+			if (board[i] == 10) {
 				Material -= 10;
-			else if (board[i] == 11)
+			} else if (board[i] == 11) {
 				Material -= 50;
-			else if (board[i] == 12)
+			} else if (board[i] == 12) {
 				Material -= 30;
-			else if (board[i] == 13)
+			} else if (board[i] == 13) {
 				Material -= 30;
-			else if (board[i] == 14)
+			} else if (board[i] == 14) {
 				Material -= 90;
-			else if (board[i] == 15)
+			} else if (board[i] == 15) {
 				Material -= 10000;
-			else if (board[i] == 20)
+			} else if (board[i] == 20) {
 				Material += 10;
-			else if (board[i] == 21)
+			} else if (board[i] == 21) {
 				Material += 50;
-			else if (board[i] == 22)
+			} else if (board[i] == 22) {
 				Material += 30;
-			else if (board[i] == 23)
+			} else if (board[i] == 23) {
 				Material += 30;
-			else if (board[i] == 24)
+			} else if (board[i] == 24) {
 				Material += 90;
-			else if (board[i] == 25)
+			} else if (board[i] == 25) {
 				Material += 10000;
+			}
 		}
 		return Material;
 	}
@@ -647,91 +697,114 @@ public class Model {
 		int[] board = position.board;
 		ArrayList<MoveTree> list = new ArrayList<MoveTree>();
 		int to = from + 1;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 25, from, to));
+		}
 		to = from - 1;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 25, from, to));
+		}
 		to = from + 10;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 25, from, to));
+		}
 		to = from - 10;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 25, from, to));
+		}
 		to = from + 11;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 25, from, to));
+		}
 		to = from - 11;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 25, from, to));
+		}
 		to = from + 9;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 25, from, to));
+		}
 		to = from - 9;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 25, from, to));
+		}
 		if (from == 95 && position.klros && board[96] == 0 && board[97] == 0 && board[98] == 21 && !position.checkW
-				&& !position.f8threat)
+				&& !position.f8threat) {
 			list.add(new MoveTree(movetree, 25, from, 97, -3));
+		}
 		if (from == 95 && position.grros && board[94] == 0 && board[93] == 0 && board[92] == 0 && board[91] == 21
-				&& !position.checkW && !position.d8threat)
+				&& !position.checkW && !position.d8threat) {
 			list.add(new MoveTree(movetree, 25, from, 93, -4));
+		}
 		return list;
 	}
 
 	private ArrayList<MoveTree> pawnmovesB(int[] board, int from, MoveTree movetree) {
 		ArrayList<MoveTree> list = new ArrayList<MoveTree>();
 		int to = from - 10;
-		if (board[to] == 0)
+		if (board[to] == 0) {
 			list.add(new MoveTree(movetree, 20, from, to));
-		else if (board[to] == 0 && to < 30)
+		} else if (board[to] == 0 && to < 30) {
 			list.add(new MoveTree(movetree, 25, from, to, -2));
+		}
 		to = from - 9;
-		if (2 < board[to] && board[to] < 18)
+		if (2 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 20, from, to));
-		else if (2 < board[to] && board[to] < 18 && to < 30)
+		} else if (2 < board[to] && board[to] < 18 && to < 30) {
 			list.add(new MoveTree(movetree, 25, from, to, -2));
+		}
 		to = from - 11;
-		if (2 < board[to] && board[to] < 18)
+		if (2 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(movetree, 20, from, to));
-		else if (2 < board[to] && board[to] < 18 && to < 30)
+		} else if (2 < board[to] && board[to] < 18 && to < 30) {
 			list.add(new MoveTree(movetree, 25, from, to, -2));
+		}
 		to = from - 20;
-		if (from > 80 && board[to] == 0 && board[to + 10] == 0)
+		if (from > 80 && board[to] == 0 && board[to + 10] == 0) {
 			list.add(new MoveTree(movetree, 20, from, to));
-		if (lastMove.piece == 10 && lastMove.from == from - 21 && lastMove.to == from - 1)
+		}
+		if (lastMove.piece == 10 && lastMove.from == from - 21 && lastMove.to == from - 1) {
 			list.add(new MoveTree(movetree, 20, from, from - 11, -1));
-		else if (lastMove.piece == 10 && lastMove.from == from - 19 && lastMove.to == from + 1)
+		} else if (lastMove.piece == 10 && lastMove.from == from - 19 && lastMove.to == from + 1) {
 			list.add(new MoveTree(movetree, 20, from, from - 9, -1));
+		}
 		return list;
 	}
 
 	private ArrayList<MoveTree> knightmovesB(int[] board, int from, MoveTree parent) {
 		ArrayList<MoveTree> list = new ArrayList<MoveTree>();
 		int to = from - 21;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, 22, from, to));
+		}
 		to = from - 19;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, 22, from, to));
+		}
 		to = from - 12;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, 22, from, to));
+		}
 		to = from - 8;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, 22, from, to));
+		}
 		to = from + 8;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, 22, from, to));
+		}
 		to = from + 12;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, 22, from, to));
+		}
 		to = from + 19;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, 22, from, to));
+		}
 		to = from + 21;
-		if (-1 < board[to] && board[to] < 18)
+		if (-1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, 22, from, to));
+		}
 		return list;
 	}
 
@@ -742,8 +815,9 @@ public class Model {
 			list.add(new MoveTree(parent, figur, from, to));
 			to += constant;
 		}
-		if (1 < board[to] && board[to] < 18)
+		if (1 < board[to] && board[to] < 18) {
 			list.add(new MoveTree(parent, figur, from, to));
+		}
 		return list;
 	}
 
@@ -821,35 +895,45 @@ public class Model {
 		int[] board = Pos.board;
 		ArrayList<MoveTree> list = new ArrayList<MoveTree>();
 		int to = from + 1;
-		if (0 == board[to] || board[to] > 18)
+		if (0 == board[to] || board[to] > 18) {
 			list.add(new MoveTree(parent, 15, from, to));
+		}
 		to = from - 1;
-		if (0 == board[to] || board[to] > 18)
+		if (0 == board[to] || board[to] > 18) {
 			list.add(new MoveTree(parent, 15, from, to));
+		}
 		to = from + 10;
-		if (0 == board[to] || board[to] > 18)
+		if (0 == board[to] || board[to] > 18) {
 			list.add(new MoveTree(parent, 15, from, to));
+		}
 		to = from - 10;
-		if (0 == board[to] || board[to] > 18)
+		if (0 == board[to] || board[to] > 18) {
 			list.add(new MoveTree(parent, 15, from, to));
+		}
 		to = from + 11;
-		if (0 == board[to] || board[to] > 18)
+		if (0 == board[to] || board[to] > 18) {
 			list.add(new MoveTree(parent, 15, from, to));
+		}
 		to = from - 11;
-		if (0 == board[to] || board[to] > 18)
+		if (0 == board[to] || board[to] > 18) {
 			list.add(new MoveTree(parent, 15, from, to));
+		}
 		to = from + 9;
-		if (0 == board[to] || board[to] > 18)
+		if (0 == board[to] || board[to] > 18) {
 			list.add(new MoveTree(parent, 15, from, to));
+		}
 		to = from - 9;
-		if (0 == board[to] || board[to] > 18)
+		if (0 == board[to] || board[to] > 18) {
 			list.add(new MoveTree(parent, 15, from, to));
+		}
 		if (from == 25 && Pos.klrow && board[26] == 0 && board[27] == 0 && board[28] == 11 && !Pos.checkB
-				&& !Pos.f1threat)
+				&& !Pos.f1threat) {
 			list.add(new MoveTree(parent, 15, from, 27, 3));
+		}
 		if (from == 25 && Pos.grrow && board[24] == 0 && board[23] == 0 && board[22] == 0 && board[21] == 11
-				&& !Pos.checkB && !Pos.d1threat)
+				&& !Pos.checkB && !Pos.d1threat) {
 			list.add(new MoveTree(parent, 15, from, 23, 4));
+		}
 		return list;
 	}
 
@@ -860,8 +944,9 @@ public class Model {
 			list.add(new MoveTree(parent, figur, from, to));
 			to += constant;
 		}
-		if (board[to] > 18)
+		if (board[to] > 18) {
 			list.add(new MoveTree(parent, figur, from, to));
+		}
 		return list;
 	}
 
@@ -869,63 +954,77 @@ public class Model {
 		ArrayList<MoveTree> list = new ArrayList<MoveTree>();
 
 		int to = from - 21;
-		if (board[to] == 0 || board[to] > 18)
+		if (board[to] == 0 || board[to] > 18) {
 			list.add(new MoveTree(parent, 12, from, to));
+		}
 		to = from - 19;
-		if (board[to] == 0 || board[to] > 18)
+		if (board[to] == 0 || board[to] > 18) {
 			list.add(new MoveTree(parent, 12, from, to));
+		}
 		to = from - 12;
-		if (board[to] == 0 || board[to] > 18)
+		if (board[to] == 0 || board[to] > 18) {
 			list.add(new MoveTree(parent, 12, from, to));
+		}
 		to = from - 8;
-		if (board[to] == 0 || board[to] > 18)
+		if (board[to] == 0 || board[to] > 18) {
 			list.add(new MoveTree(parent, 12, from, to));
+		}
 		to = from + 8;
-		if (board[to] == 0 || board[to] > 18)
+		if (board[to] == 0 || board[to] > 18) {
 			list.add(new MoveTree(parent, 12, from, to));
+		}
 		to = from + 12;
-		if (board[to] == 0 || board[to] > 18)
+		if (board[to] == 0 || board[to] > 18) {
 			list.add(new MoveTree(parent, 12, from, to));
+		}
 		to = from + 19;
-		if (board[to] == 0 || board[to] > 18)
+		if (board[to] == 0 || board[to] > 18) {
 			list.add(new MoveTree(parent, 12, from, to));
+		}
 		to = from + 21;
-		if (board[to] == 0 || board[to] > 18)
+		if (board[to] == 0 || board[to] > 18) {
 			list.add(new MoveTree(parent, 12, from, to));
+		}
 		return list;
 	}
 
 	private ArrayList<MoveTree> pawnmovesW(int[] board, int from, MoveTree parent) {
 		ArrayList<MoveTree> list = new ArrayList<MoveTree>();
 		int to = from + 10;
-		if (board[to] == 0 && to < 90)
+		if (board[to] == 0 && to < 90) {
 			list.add(new MoveTree(parent, 10, from, to));
-		else if (board[to] == 0 && to > 90)
+		} else if (board[to] == 0 && to > 90) {
 			list.add(new MoveTree(parent, 10, from, to, 2));
+		}
 		to = from + 9;
-		if (board[to] > 18 && to < 90)
+		if (board[to] > 18 && to < 90) {
 			list.add(new MoveTree(parent, 10, from, to));
-		else if (board[to] > 18 && to > 90)
+		} else if (board[to] > 18 && to > 90) {
 			list.add(new MoveTree(parent, 10, from, to, 2));
+		}
 		to = from + 11;
-		if (board[to] > 18 && to < 90)
+		if (board[to] > 18 && to < 90) {
 			list.add(new MoveTree(parent, 10, from, to));
-		else if (board[to] > 18 && to > 90)
+		} else if (board[to] > 18 && to > 90) {
 			list.add(new MoveTree(parent, 10, from, to, 2));
+		}
 		to = from + 20;
-		if (from < 40 && board[to] == 0 && board[to - 10] == 0)
+		if (from < 40 && board[to] == 0 && board[to - 10] == 0) {
 			list.add(new MoveTree(parent, 10, from, to));
-		if (lastMove.piece == 20 && lastMove.from == from + 21 && lastMove.to == from + 1)
+		}
+		if (lastMove.piece == 20 && lastMove.from == from + 21 && lastMove.to == from + 1) {
 			list.add(new MoveTree(parent, 10, from, from + 11, 1));
-		if (lastMove.piece == 20 && lastMove.from == from + 19 && lastMove.to == from - 1)
+		}
+		if (lastMove.piece == 20 && lastMove.from == from + 19 && lastMove.to == from - 1) {
 			list.add(new MoveTree(parent, 10, from, from + 9, 1));
+		}
 		return list;
 	}
 
 	private int randomNumber(int from, int to) {
-		if (from == to)
+		if (from == to) {
 			return from;
-		else {
+		} else {
 			double d = Math.random();
 			d = d * (to - from) + from;
 			return (int) Math.round(d);

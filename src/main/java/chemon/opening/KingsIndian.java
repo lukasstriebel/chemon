@@ -1,15 +1,15 @@
-package MA.Openings;
+package chemon.opening;
 
-import MA.util.Move;
-import MA.util.MoveTree;
+import chemon.util.Move;
+import chemon.util.MoveTree;
 
 /**
  * Die Zugfolge für die Königsindische Eröffnung
  * @author Lukas
  *
  */
-public class Kings_Indian extends Opening{
-	public Kings_Indian()
+public class KingsIndian extends Opening {
+	public KingsIndian()
 	{
 		Start = new MoveTree( new Move(0,0,0));
 		Start.addChild(new MoveTree( new Move(10, 34, 54)));//1.d4
@@ -44,5 +44,5 @@ public class Kings_Indian extends Opening{
 		helpTree = helpTree.children.get(0);
 		helpTree.addChild(new MoveTree( new Move (22,73,85)));//8.Ne7
 		helpTree = Start;
-		}
+	}
 }

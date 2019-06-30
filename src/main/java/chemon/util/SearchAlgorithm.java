@@ -1,4 +1,4 @@
-package MA.util;
+package chemon.util;
 
 /**
  * Das Enum SearchAlgorithm definiert den Suchalgorithmus
