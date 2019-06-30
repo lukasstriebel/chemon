@@ -1,12 +1,37 @@
 package MA.Chemon;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.*;
-import javax.swing.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 
 import MA.util.State;
 
@@ -15,7 +40,7 @@ public class View {
 	private final int HORIZONTAL_OFFSET = 40, VERTICAL_OFFSET = 40;
 	private final int SQUARE_LENGTH = 100;
 	String[] gifPath = { "b", "w", "wpb", "wpw", "wrb", "wrw", "wnb", "wnw", "wbb", "wbw", "wqb", "wqw", "wkb", "wkw",
-			 "bpb", "bpw", "brb", "brw", "bnb", "bnw", "bbb", "bbw", "bqb", "bqw", "bkb", "bkw" };
+			"bpb", "bpw", "brb", "brw", "bnb", "bnw", "bbb", "bbw", "bqb", "bqw", "bkb", "bkw" };
 	Image[] pictures = new Image[26];
 	boolean[] boardColors;
 	String path;
@@ -31,12 +56,13 @@ public class View {
 	JMenuBar menuBar;
 	JMenu fileMenu, gameMenu, viewMenu;
 	JMenuItem newGameItem, moveBackItem, exitItem, saveGameItem, openGameItem, resignItem, offerDrawItem, refreshItem,
-			optionsItem;
+	optionsItem;
 	InfoPanel panel = new InfoPanel();
 
 	private class InfoPanel extends JPanel implements ActionListener {
 		private static final long serialVersionUID = -7710107088317624786L;
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == newGameItem) {
 				controller.newGame();
@@ -57,6 +83,7 @@ public class View {
 			}
 		}
 
+		@Override
 		public void paintComponent(Graphics graphics) {
 			super.paintComponent(graphics);
 			l1.repaint();
@@ -172,7 +199,7 @@ public class View {
 		graphics.fillRect(HORIZONTAL_OFFSET-20, VERTICAL_OFFSET-20, 40 + 8 * SQUARE_LENGTH, 40 + 8 * SQUARE_LENGTH);
 		for (int i = 21; i < 99; i++) {
 			int piece = controller.position.board[i];
-			if(piece == 0) {}
+			if (piece == 0) {
 				drawSquare(i, graphics);
 			} else if(piece > 0) {
 				drawPiece(controller.position.board[i], i, graphics);
@@ -285,6 +312,7 @@ public class View {
 		options.add(l7);
 		hvm.setSelected(true);
 		hvh.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (hvh.isSelected() || mvm.isSelected()) {
 					hvm.setSelected(false);
@@ -296,6 +324,7 @@ public class View {
 			}
 		});
 		hvm.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (hvm.isSelected() || mvm.isSelected()) {
 					hvh.setSelected(false);
@@ -307,16 +336,19 @@ public class View {
 			}
 		});
 		mvm.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (hvm.isSelected() || hvh.isSelected()) {
 					hvh.setSelected(false);
 					hvm.setSelected(false);
-				} else
+				} else {
 					mvm.setSelected(true);
+				}
 				controller.status = State.Machine_versus_Machine;
 			}
 		});
 		ok.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				options.dispose();
 			}
@@ -325,7 +357,7 @@ public class View {
 
 	public void movesound() { // spielt einen Ton ab um den Spieler �ber einen Move zu informieren
 		try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(path + "\\resources\\MOVE.wav"));
-			BufferedInputStream bufferedInputStream = new BufferedInputStream(audioInputStream)){	
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(audioInputStream)){
 			AudioFormat af = audioInputStream.getFormat();
 			int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength());
 			byte[] audio = new byte[size];
