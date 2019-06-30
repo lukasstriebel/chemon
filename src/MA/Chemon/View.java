@@ -35,30 +35,30 @@ public class View {
 	InfoPanel panel = new InfoPanel();
 
 	private class InfoPanel extends JPanel implements ActionListener {
-
 		private static final long serialVersionUID = -7710107088317624786L;
 
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == newGameItem)
+			if (e.getSource() == newGameItem) {
 				controller.newGame();
-			else if (e.getSource() == moveBackItem)
+			} else if (e.getSource() == moveBackItem) {
 				controller.moveBack();
-			else if (e.getSource() == saveGameItem)
+			} else if (e.getSource() == saveGameItem) {
 				controller.saveGame();
-			else if (e.getSource() == openGameItem)
+			} else if (e.getSource() == openGameItem) {
 				controller.openGame();
-			else if (e.getSource() == resignItem)
+			} else if (e.getSource() == resignItem) {
 				controller.resign();
-			else if (e.getSource() == exitItem)
+			} else if (e.getSource() == exitItem) {
 				System.exit(0);
-			else if (e.getSource() == offerDrawItem)
+			} else if (e.getSource() == offerDrawItem) {
 				controller.offerDraw();
-			else if (e.getSource() == optionsItem)
+			} else if (e.getSource() == optionsItem) {
 				controller.openOptions();
+			}
 		}
 
 		public void paintComponent(Graphics graphics) {
-			super.paintComponent(graphics); 
+			super.paintComponent(graphics);
 			l1.repaint();
 			l2.repaint();
 			l3.repaint();
@@ -85,7 +85,7 @@ public class View {
 				controller.handleMousePressed(mouseClickToField(e.getLocationOnScreen().x, e.getLocationOnScreen().y));
 			}
 		});
-		l1 = new JLabel("© 2010 - 2018 Lukas Striebel");
+		l1 = new JLabel("ï¿½ 2010 - 2018 Lukas Striebel");
 		l2 = new JLabel("");
 		l3 = new JLabel("Partieverlauf");
 		l4 = new JLabel("Stellungsbewertung");
@@ -123,19 +123,20 @@ public class View {
 		frame.getContentPane().add(l6, BorderLayout.CENTER);
 		frame.getContentPane().add(l7, BorderLayout.CENTER);
 		frame.getContentPane().add(panel);
-		
+
 		try {
 			path = new File("").getCanonicalPath();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		for (int i = 0; i < 26; i++)
+		for (int i = 0; i < 26; i++) {
 			try {
 				String file = path + "\\resources\\" + gifPath[i] + ".gif";
 				pictures[i] = ImageIO.read(new File(file));
 			} catch (Exception e) {
-				System.err.println(e.getMessage());
+				e.printStackTrace();
 			}
+		}
 		frame.setVisible(true);
 		panel.setLocation(0, 0);
 	}
@@ -143,52 +144,58 @@ public class View {
 	public int mouseClickToField(int horizontal, int vertical) {
 		int row = (vertical - VERTICAL_OFFSET - 50) / SQUARE_LENGTH;
 		int column = (horizontal - HORIZONTAL_OFFSET) / SQUARE_LENGTH;
-		if(row > 8 || column > 8)
+		if(row > 8 || column > 8) {
 			return -1;
+		}
 		return column+1 + (9 - row)*10;
 	}
 
 	public int fieldToHorizontalPosition(int field) {
 		int column = field % 10;
-		if(column > 8 || column < 1)
+		if(column > 8 || column < 1) {
 			return -1;
+		}
 		return HORIZONTAL_OFFSET +  (column - 1) * SQUARE_LENGTH;
 
 	}
 
 	public int fieldToVerticalPosition(int field) {
 		int row = field / 10;
-		if(row > 10 || row < 2)
+		if(row > 10 || row < 2) {
 			return -1;
+		}
 		return VERTICAL_OFFSET + (9 - row) * SQUARE_LENGTH;
 	}
 
-	public void drawBoard(Graphics graphics) {	
+	public void drawBoard(Graphics graphics) {
 		graphics.setColor(new Color(128, 64, 0));
 		graphics.fillRect(HORIZONTAL_OFFSET-20, VERTICAL_OFFSET-20, 40 + 8 * SQUARE_LENGTH, 40 + 8 * SQUARE_LENGTH);
 		for (int i = 21; i < 99; i++) {
 			int piece = controller.position.board[i];
-			if(piece == 0)
+			if(piece == 0) {}
 				drawSquare(i, graphics);
-			else if(piece > 0)
+			} else if(piece > 0) {
 				drawPiece(controller.position.board[i], i, graphics);
+			}
 		}
 	}
 
 	private void drawSquare(int square, Graphics graphics) {
 		int x = fieldToHorizontalPosition(square), y = fieldToVerticalPosition(square);
 		if (x != -1 && y != -1) {
-			if (boardColors[square - 21])
+			if (boardColors[square - 21]) {
 				graphics.drawImage(pictures[1], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
-			else
+			} else {
 				graphics.drawImage(pictures[0], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
+			}
 		}
 	}
-	
+
 	private void drawPiece(int piece, int field, Graphics graphics) {
 		int x = fieldToHorizontalPosition(field), y = fieldToVerticalPosition(field);
-		if(piece >= 20)
+		if(piece >= 20) {
 			piece -= 4;
+		}
 		int blackSquare = boardColors[field - 21] ? 1 : 0;
 		int imageIndex = piece * 2 - 18 + blackSquare;
 		graphics.drawImage(pictures[imageIndex], x, y, SQUARE_LENGTH, SQUARE_LENGTH, null);
@@ -214,11 +221,11 @@ public class View {
 		viewMenu = new JMenu("Ansicht");
 		offerDrawItem = new JMenuItem("Remis anbieten");
 		resignItem = new JMenuItem("Aufgeben");
-		moveBackItem = new JMenuItem("Zug zurück");
+		moveBackItem = new JMenuItem("Zug zurï¿½ck");
 		exitItem = new JMenuItem("Beenden");
 		newGameItem = new JMenuItem("Neue Partie");
 		saveGameItem = new JMenuItem("Partie speichern");
-		openGameItem = new JMenuItem("Partie öffnen");
+		openGameItem = new JMenuItem("Partie ï¿½ffnen");
 		refreshItem = new JMenuItem("Aktualisieren");
 		optionsItem = new JMenuItem("Einstellungen");
 		int km = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -255,8 +262,9 @@ public class View {
 	public void setColors() {
 		boardColors = new boolean[80];
 		for(int i = 1; i < boardColors.length; i += 2) {
-			if(i % 10 == 0 || i % 10 == 9)
+			if(i % 10 == 0 || i % 10 == 9) {
 				i++;
+			}
 			boardColors[i] = true;
 		}
 	}
@@ -281,8 +289,9 @@ public class View {
 				if (hvh.isSelected() || mvm.isSelected()) {
 					hvm.setSelected(false);
 					mvm.setSelected(false);
-				} else
+				} else {
 					hvh.setSelected(true);
+				}
 				controller.status = State.Human_versus_Human;
 			}
 		});
@@ -291,8 +300,9 @@ public class View {
 				if (hvm.isSelected() || mvm.isSelected()) {
 					hvh.setSelected(false);
 					mvm.setSelected(false);
-				} else
+				} else {
 					hvm.setSelected(true);
+				}
 				controller.status = State.Human_versus_Machine;
 			}
 		});
@@ -313,10 +323,9 @@ public class View {
 		});
 	}
 
-	public void movesound() { // spielt einen Ton ab um den Spieler über einen Move zu informieren
-		try {
-			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(path + "\\resources\\MOVE.wav"));
-			BufferedInputStream bufferedInputStream = new BufferedInputStream(audioInputStream);
+	public void movesound() { // spielt einen Ton ab um den Spieler ï¿½ber einen Move zu informieren
+		try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(path + "\\resources\\MOVE.wav"));
+			BufferedInputStream bufferedInputStream = new BufferedInputStream(audioInputStream)){	
 			AudioFormat af = audioInputStream.getFormat();
 			int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength());
 			byte[] audio = new byte[size];
