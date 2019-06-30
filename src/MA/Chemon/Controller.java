@@ -20,11 +20,11 @@ import MA.util.State;
 
 public class Controller {
 
-	Engine engine; // Model
-	Interface view; // View
+	Model engine; // Model
+	View view; // View
 	Stack<Position> oldPositions;
 	Position position = new Position(new int[120]);
-	int start, selectedPiece,  movecount;
+	int start, selectedPiece, movecount;
 	boolean pieceHeld, running = true, isWhite, humanvsmachine = true, whitesTurn, draw;
 	String notation;
 	double time;
@@ -34,17 +34,17 @@ public class Controller {
 	public Controller() {
 
 		initializeBoard();
-		engine = new Engine(position);
+		engine = new Model(position);
 		engine.controller = this;
 		engine.numberOfMoves = 10;
-		view = new Interface();
+		view = new View();
 		view.controller = this;
 		newGame();
 	}
 
 	public static void main(String[] args) {
 		Controller con = new Controller();
-		//con.openOptions();
+		// con.openOptions();
 	}
 
 	public void handleMousePressed(int where) {
@@ -84,9 +84,9 @@ public class Controller {
 					handleMove(move);
 					if (running)
 						evaluateBestMove();
-				} else 
+				} else
 					JOptionPane.showMessageDialog(null, "This is not a legal move!");
-			} else if (status == State.Human_versus_Human) 
+			} else if (status == State.Human_versus_Human)
 				if (whitesTurn && selectedPiece < 18 && engine.isLegalWhite(move))
 					handleMove(move);
 				else if (!whitesTurn && selectedPiece > 18 && engine.isLegalBlack(move))
@@ -109,7 +109,6 @@ public class Controller {
 		handleMove(bestMove);
 	}
 
-
 	public void handleMove(Move move) {
 		boolean pieceTaken = position.board[move.to] > 0;
 		oldPositions.push(position.clone());
@@ -123,8 +122,8 @@ public class Controller {
 
 		view.mark(move.from, Color.blue);
 		view.mark(move.to, Color.blue);
-		
-		if (whitesTurn) {			
+
+		if (whitesTurn) {
 			if (engine.legalMovesB(position, test).isEmpty()) {
 				if (engine.blackIsChecked(position))
 					engine.blackIsMated = true;
@@ -132,11 +131,11 @@ public class Controller {
 					JOptionPane.showMessageDialog(null, "Stalemate!");
 					draw = true;
 				}
-				running = false;				
+				running = false;
 			}
 			movecount++;
 			insertWhiteMove(move, pieceTaken);
-			engine.handleWhiteMove(move);					
+			engine.handleWhiteMove(move);
 		} else {
 			if (engine.legalMovesW(position, test).isEmpty()) {
 				if (engine.whiteIsChecked(position))
@@ -150,7 +149,7 @@ public class Controller {
 			insertBlackMove(move, pieceTaken);
 		}
 		whitesTurn = !whitesTurn;
-		if(draw)
+		if (draw)
 			handleDraw();
 		if (status == State.Human_versus_Human)
 			engine.currentPosition = this.position;
@@ -159,11 +158,10 @@ public class Controller {
 			handleMove(engine.bestMove);
 
 		}
-		
+
 	}
 
-	public void insertWhiteMove(Move move, boolean pieceTaken) 
-	{
+	public void insertWhiteMove(Move move, boolean pieceTaken) {
 		notation = movecount + ". " + move.toString(pieceTaken);
 		if (engine.blackIsMated) {
 			notation += "# 1-0";
@@ -176,8 +174,7 @@ public class Controller {
 		view.movesTextArea.append(notation);
 	}
 
-	public void insertBlackMove(Move move, boolean pieceTaken) 
-	{
+	public void insertBlackMove(Move move, boolean pieceTaken) {
 		notation = " " + move.toString(pieceTaken);
 		if (engine.whiteIsMated) {
 			notation += "# 0-1";
@@ -195,12 +192,11 @@ public class Controller {
 	}
 
 	public void initializeBoard() {
-		int[] board = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 11, 12, 13, 14,
-				15, 13, 12, 11, -1, -1, 10, 10, 10, 10, 10, 10, 10, 10, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0,
-				0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 20, 20, 20, 20,
-				20, 20, 20, 20, -1, -1, 21, 22, 23, 24, 25, 23, 22, 21, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-				-1, -1, -1, -1, -1, -1, -1, -1,
-				-1, };
+		int[] board = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 11, 12, 13,
+				14, 15, 13, 12, 11, -1, -1, 10, 10, 10, 10, 10, 10, 10, 10, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0,
+				0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 20, 20, 20,
+				20, 20, 20, 20, 20, -1, -1, 21, 22, 23, 24, 25, 23, 22, 21, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, };
 		position.board = board;
 		position.grros = true;
 		position.grrow = true;
@@ -222,8 +218,8 @@ public class Controller {
 	public int promotePawn() {
 		int piece = 14;
 		String[] s = { "Queen", "Rock", "Bishop", "Knight" };
-		int antwort = JOptionPane.showOptionDialog(view.frame, "Umwandeln in?", "Auswahl",
-				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, s, "Queen");
+		int antwort = JOptionPane.showOptionDialog(view.frame, "Umwandeln in?", "Auswahl", JOptionPane.YES_NO_OPTION,
+				JOptionPane.PLAIN_MESSAGE, null, s, "Queen");
 		if (antwort == 0 || antwort == -1)
 			piece = 14;
 		else if (antwort == 1)
@@ -269,7 +265,7 @@ public class Controller {
 		selectedPiece = 0;
 		notation = "";
 		whitesTurn = true;
-		engine = new Engine(position);
+		engine = new Model(position);
 		draw = false;
 		engine.controller = this;
 		if (status == State.Machine_versus_Machine) {
@@ -297,7 +293,7 @@ public class Controller {
 		fc.setFileFilter(filter);
 		int returnVal = fc.showOpenDialog(view.frame);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			file = fc.getSelectedFile();			
+			file = fc.getSelectedFile();
 			try {
 				FileReader fr = new FileReader(file);
 				char c = (char) fr.read();
@@ -314,7 +310,7 @@ public class Controller {
 				fr.close();
 			} catch (Exception e) {
 				e.printStackTrace();
-			} 
+			}
 		}
 	}
 
@@ -337,10 +333,10 @@ public class Controller {
 			try {
 				fw = new FileWriter(path + "\\" + name + ".pgn");
 				fw.write("[Event \"Trainingspartie\"]\n[Site \"Schweiz\"]\n[Date \"" + new Date().getDate() + "\"]\n"
-						+ "[White \"" + player + "\"]\n[Black \"Chemon 1.3\"]\n[Round \"1\"]\n" + "[Result \""
-						+ result + "\"]\n" + /*
-												 * [ECO\ "C10\"]\n[WhiteElo \"2485\"]\n[BlackElo \"2663\"]\n" +
-												 */
+						+ "[White \"" + player + "\"]\n[Black \"Chemon 1.3\"]\n[Round \"1\"]\n" + "[Result \"" + result
+						+ "\"]\n" + /*
+									 * [ECO\ "C10\"]\n[WhiteElo \"2485\"]\n[BlackElo \"2663\"]\n" +
+									 */
 						"[PlyCount \"" + (engine.numberOfMoves) + "\"]\n" + view.movesTextArea.getText());
 			} catch (IOException E) {
 				JOptionPane.showMessageDialog(null, "Konnte Datei nicht erstellen.");
@@ -378,10 +374,10 @@ public class Controller {
 			status = State.Human_versus_Machine;
 		else if (response == 2)
 			status = State.Machine_versus_Machine;
-		else 
+		else
 			System.exit(0);
 	}
-	
+
 	public void handleDraw() {
 		view.movesTextArea.append(" 1/2-1/2");
 	}

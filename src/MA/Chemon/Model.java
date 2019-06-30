@@ -16,7 +16,7 @@ import MA.util.Position;
 import MA.util.SearchAlgorithm;
 import MA.util.State;
 
-public class Engine {
+public class Model {
 
 	Move lastMove, bestMove;
 	boolean inOpening, blackIsMated, whiteIsMated;
@@ -27,11 +27,11 @@ public class Engine {
 	Controller controller;
 	int analyzedPositions;
 
-	public Engine() {
+	public Model() {
 		lastMove = new Move(10, 0, 0);
 	}
 
-	public Engine(Position position) {
+	public Model(Position position) {
 		lastMove = new Move(10, 0, 0);
 		numberOfMoves = 0;
 		currentPosition = position.clone();

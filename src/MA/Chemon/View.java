@@ -10,7 +10,7 @@ import javax.swing.*;
 
 import MA.util.State;
 
-public class Interface {
+public class View {
 
 	private final int HORIZONTAL_OFFSET = 40, VERTICAL_OFFSET = 40;
 	private final int SQUARE_LENGTH = 100;
@@ -32,12 +32,10 @@ public class Interface {
 	JMenu fileMenu, gameMenu, viewMenu;
 	JMenuItem newGameItem, moveBackItem, exitItem, saveGameItem, openGameItem, resignItem, offerDrawItem, refreshItem,
 			optionsItem;
-	MyJPanel panel = new MyJPanel();
+	InfoPanel panel = new InfoPanel();
 
-	class MyJPanel extends JPanel implements ActionListener {
-		/**
-		 * 
-		 */
+	private class InfoPanel extends JPanel implements ActionListener {
+
 		private static final long serialVersionUID = -7710107088317624786L;
 
 		public void actionPerformed(ActionEvent e) {
@@ -71,7 +69,7 @@ public class Interface {
 		}
 	}
 
-	public Interface() {
+	public View() {
 
 		setColors();
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
